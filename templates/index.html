@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Dashboard{% endblock %}
+{% block title %}Novo Mundo das Tintas{% endblock %}
 {% block content %}
 
 {% set aviso_retirada = transacoes | selectattr('status', 'equalto', 'concluido') | list %}

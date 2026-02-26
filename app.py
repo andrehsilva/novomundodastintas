@@ -7,8 +7,21 @@ from flask import Flask, flash, redirect, render_template, request, url_for
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from models import Product, Transaction, User, db
 
+from supabase import create_client
+
+# Inicializa o cliente Supabase
+supabase_url = os.getenv("SUPABASE_URL")
+supabase_key = os.getenv("SUPABASE_KEY")
+supabase = create_client(supabase_url, supabase_key)
+bucket_name = "premios_tintas"
+
+
+
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
+#app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
+# app.py
+# Altere a linha da URI para:
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-key")
 db.init_app(app)
@@ -235,6 +248,8 @@ def admin_deletar_usuario(id):
     return redirect(url_for("admin_usuarios"))
 
 
+
+
 @app.route("/admin/premios", methods=["GET", "POST"])
 @login_required
 def admin_premios():
@@ -246,28 +261,29 @@ def admin_premios():
         if acao == "cadastrar_produto":
             file = request.files.get("imagem_file")
             if file and allowed_file(file.filename):
-                from werkzeug.utils import secure_filename
-                filename = secure_filename(f"{datetime.now().timestamp()}_{file.filename}")
-                file.save(os.path.join(app.root_path, 'static/uploads', filename))
-                imagem_url = f"uploads/{filename}" 
+                filename = f"{datetime.now().timestamp()}_{file.filename}"
+                filepath = f"public/{filename}"
+                
+                # Upload para o Supabase Storage
+                content = file.read()
+                supabase.storage.from_(bucket_name).upload(filepath, content)
+                
+                # Gera a URL pública do arquivo
+                imagem_url = supabase.storage.from_(bucket_name).get_public_url(filepath)
 
                 novo = Product(
                     nome=request.form.get("nome"),
                     descricao=request.form.get("descricao"),
                     valor_pontos=parse_int(request.form.get("valor_pontos"), 0),
                     categoria=request.form.get("categoria"),
-                    imagem_url=imagem_url
+                    imagem_url=imagem_url # Agora salva a URL completa da nuvem
                 )
                 db.session.add(novo)
                 db.session.commit()
-                flash("Prêmio cadastrado!", "success")
+                flash("Prêmio cadastrado no Supabase!", "success")
             else:
-                flash("Arquivo inválido ou não selecionado.", "error")
+                flash("Arquivo inválido.", "error")
         return redirect(url_for("admin_premios"))
-
-    produtos = Product.query.order_by(Product.nome).all()
-    return render_template("admin_premios.html", produtos=produtos)
-
 
 @app.route("/admin/confirmar_entrega/<int:id>", methods=["POST"])
 @login_required

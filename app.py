@@ -249,7 +249,6 @@ def admin_deletar_usuario(id):
 
 
 
-
 @app.route("/admin/premios", methods=["GET", "POST"])
 @login_required
 def admin_premios():
@@ -261,14 +260,11 @@ def admin_premios():
         if acao == "cadastrar_produto":
             file = request.files.get("imagem_file")
             if file and allowed_file(file.filename):
+                # ... lógica de upload para o Supabase ...
                 filename = f"{datetime.now().timestamp()}_{file.filename}"
                 filepath = f"public/{filename}"
-                
-                # Upload para o Supabase Storage
                 content = file.read()
                 supabase.storage.from_(bucket_name).upload(filepath, content)
-                
-                # Gera a URL pública do arquivo
                 imagem_url = supabase.storage.from_(bucket_name).get_public_url(filepath)
 
                 novo = Product(
@@ -276,14 +272,21 @@ def admin_premios():
                     descricao=request.form.get("descricao"),
                     valor_pontos=parse_int(request.form.get("valor_pontos"), 0),
                     categoria=request.form.get("categoria"),
-                    imagem_url=imagem_url # Agora salva a URL completa da nuvem
+                    imagem_url=imagem_url
                 )
                 db.session.add(novo)
                 db.session.commit()
-                flash("Prêmio cadastrado no Supabase!", "success")
+                flash("Prêmio cadastrado!", "success")
+                return redirect(url_for("admin_premios")) # Retorno após POST
             else:
                 flash("Arquivo inválido.", "error")
-        return redirect(url_for("admin_premios"))
+                return redirect(url_for("admin_premios")) # Retorno após erro no arquivo
+
+    # --- OBRIGATÓRIO: Retorno para o método GET ---
+    # Este comando deve estar alinhado com o primeiro 'if'
+    produtos = Product.query.order_by(Product.nome).all()
+    return render_template("admin_premios.html", produtos=produtos)
+
 
 @app.route("/admin/confirmar_entrega/<int:id>", methods=["POST"])
 @login_required

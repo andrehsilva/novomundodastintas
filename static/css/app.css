@@ -1,0 +1,14 @@
+.animate-toast {
+  animation: slide-up 0.35s ease;
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

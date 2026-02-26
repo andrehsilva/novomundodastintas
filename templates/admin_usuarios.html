@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+{% block title %}Gestão de Usuários - PinturaFiel{% endblock %}
+
+{% block content %}
+<style>
+    .dt-search input { @apply input input-bordered input-sm bg-white text-gray-700 !important; border-color: #d1d5db !important; }
+    .dt-paging-button { @apply btn btn-sm btn-ghost !important; background-color: white !important; color: #00295d !important; border: 1px solid #e5e7eb !important; }
+    .dt-paging-button.current { @apply btn-primary text-white !important; border: none !important; }
+    .buttons-excel { @apply btn btn-success btn-sm text-white border-none shadow-sm !important; background-color: #22c55e !important; }
+    .dt-container { @apply text-gray-700 !important; }
+    .dt-info { @apply text-xs opacity-70 !important; }
+</style>
+
+<div class="max-w-[98%] mx-auto space-y-6 pb-10">
+    
+    <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-base-100 p-6 rounded-2xl shadow-sm border border-base-300">
+        <div>
+            <h1 class="text-3xl font-bold text-[#00295d]">Gestão de Usuários</h1>
+            <p class="text-sm opacity-60">Administre perfis e controle a logística de prêmios.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <button onclick="modal_novo_usuario.showModal()" class="btn btn-outline border-[#00295d] text-[#00295d] hover:bg-[#00295d] hover:text-white">
+                <i class="fa-solid fa-user-plus"></i> Novo Usuário
+            </button>
+            <button onclick="modal_credito.showModal()" class="btn btn-primary text-white shadow-md">
+                <i class="fa-solid fa-plus-circle"></i> Novo Lançamento
+            </button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        
+        {% set pendentes = transacoes_todas | selectattr('status', 'equalto', 'pendente') | list %}
+        <div class="card bg-white shadow-lg border-l-4 border-l-info">
+            <div class="card-body p-4">
+                <h2 class="card-title text-sm text-info flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-check"></i> Novos Pedidos para Aprovar ({{ pendentes|length }})
+                </h2>
+                <div class="overflow-x-auto mt-2">
+                    <table class="table table-xs w-full">
+                        <tbody>
+                            {% for r in pendentes %}
+                            <tr class="hover:bg-base-200/50">
+                                <td class="font-bold">{{ r.user.nome }}</td>
+                                <td class="italic text-xs">{{ r.descricao }}</td>
+                                <td class="text-right space-x-1">
+                                    <form method="post" action="{{ url_for('admin_aprovar_resgate', id=r.id, acao='confirmar') }}" class="inline">
+                                        <button class="btn btn-success btn-xs text-white">Aprovar</button>
+                                    </form>
+                                    <form method="post" action="{{ url_for('admin_aprovar_resgate', id=r.id, acao='reprovar') }}" class="inline">
+                                        <button class="btn btn-ghost btn-xs text-error">Recusar</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% if not pendentes %}<p class="text-center py-4 opacity-40 text-xs italic">Nenhum pedido pendente.</p>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% set para_entregar = transacoes_todas | selectattr('status', 'equalto', 'concluido') | list %}
+        <div class="card bg-white shadow-lg border-l-4 border-l-success">
+            <div class="card-body p-4">
+                <h2 class="card-title text-sm text-success flex items-center gap-2">
+                    <i class="fa-solid fa-truck-ramp-box"></i> Aguardando Retirada na Loja ({{ para_entregar|length }})
+                </h2>
+                <div class="overflow-x-auto mt-2">
+                    <table class="table table-xs w-full">
+                        <tbody>
+                            {% for r in para_entregar %}
+                            <tr class="bg-success/5">
+                                <td class="font-bold">{{ r.user.nome }}</td>
+                                <td class="text-xs">{{ r.descricao }}</td>
+                                <td class="text-right">
+                                    <form method="post" action="{{ url_for('admin_confirmar_entrega', id=r.id) }}">
+                                        <button class="btn btn-primary btn-xs text-white font-bold">Confirmar Entrega</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% if not para_entregar %}<p class="text-center py-4 opacity-40 text-xs italic">Nenhum prêmio para entregar.</p>{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card bg-white shadow-xl border border-base-300">
+        <div class="card-body p-6">
+            <table id="tabelaPintores" class="table table-zebra w-full !border-collapse">
+                <thead class="bg-base-200 text-[#00295d]">
+                    <tr>
+                        <th>Pintor</th>
+                        <th>CPF/CNPJ</th>
+                        <th>Acumulado</th>
+                        <th>Resgatado</th>
+                        <th>Saldo</th>
+                        <th class="text-center no-export">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in pintores %}
+                    {# Cálculos: O gasto agora inclui 'concluido' (autorizado) e 'entregue' (físico) #}
+                    {% set ganho = p.transacoes | rejectattr('status', 'equalto', 'reprovado') | selectattr('pontos', 'gt', 0) | map(attribute='pontos') | sum %}
+                    {% set gasto = p.transacoes | selectattr('status', 'in', ['concluido', 'entregue', 'pendente']) | selectattr('pontos', 'lt', 0) | map(attribute='pontos') | sum | abs %}
+                    <tr>
+                        <td class="font-bold">{{ p.nome }}</td>
+                        <td class="text-xs">{{ p.cpf_cnpj }}</td>
+                        <td class="text-success font-bold">+ {{ ganho }}</td>
+                        <td class="text-error font-bold">- {{ gasto }}</td>
+                        <td><div class="badge badge-neutral font-bold">{{ p.saldo_total }}</div></td>
+                        <td class="text-center">
+                            <div class="flex justify-center gap-1">
+                                <button onclick="document.getElementById('modal_log_{{ p.id }}').showModal()" class="btn btn-circle btn-ghost btn-xs text-info"><i class="fa-solid fa-clock-rotate-left"></i></button>
+                                <button onclick="document.getElementById('modal_edit_{{ p.id }}').showModal()" class="btn btn-circle btn-ghost btn-xs text-warning"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="document.getElementById('modal_del_{{ p.id }}').showModal()" class="btn btn-circle btn-ghost btn-xs text-error"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <dialog id="modal_novo_usuario" class="modal">
+        <div class="modal-box max-w-md border-2 border-primary/20">
+            <h3 class="font-bold text-xl mb-6 text-primary"><i class="fa-solid fa-user-plus"></i> Novo Profissional</h3>
+            <form method="post" action="{{ url_for('admin_novo_usuario') }}" class="space-y-4">
+                <input type="text" name="nome" placeholder="Nome Completo" class="input input-bordered w-full" required>
+                <input type="email" name="email" placeholder="E-mail" class="input input-bordered w-full" required>
+                <input type="text" name="cpf_cnpj" placeholder="CPF ou CNPJ" class="input input-bordered w-full" required>
+                <input type="password" name="senha" placeholder="Senha" class="input input-bordered w-full" required>
+                <button type="submit" class="btn btn-primary w-full text-white font-bold">Criar e Ativar</button>
+            </form>
+            <form method="dialog" class="mt-2"><button class="btn btn-ghost btn-block btn-sm">Cancelar</button></form>
+        </div>
+    </dialog>
+
+    <dialog id="modal_credito" class="modal">
+        <div class="modal-box max-w-md border border-primary/20">
+            <h3 class="font-bold text-xl mb-6 text-primary flex items-center gap-2"><i class="fa-solid fa-coins"></i> Novo Crédito</h3>
+            <form method="post" action="{{ url_for('admin_usuarios') }}" class="space-y-4">
+                <input type="hidden" name="acao" value="credito_manual">
+                <select name="user_id" class="select select-bordered w-full" required>
+                    <option value="" disabled selected>Selecione o pintor...</option>
+                    {% for p in pintores %}<option value="{{ p.id }}">{{ p.nome }}</option>{% endfor %}
+                </select>
+                <input type="number" name="pontos" class="input input-bordered w-full" placeholder="Pontos" required min="1">
+                <input type="text" name="descricao" class="input input-bordered w-full" placeholder="NF ou Referência" required>
+                <button class="btn btn-primary w-full text-white font-bold">Confirmar</button>
+            </form>
+            <form method="dialog" class="mt-2"><button class="btn btn-ghost btn-block btn-sm">Cancelar</button></form>
+        </div>
+    </dialog>
+
+    {% for p in pintores %}
+    <dialog id="modal_log_{{ p.id }}" class="modal">
+        <div class="modal-box w-11/12 max-w-4xl p-0 overflow-hidden">
+            <div class="bg-base-200 p-6 flex justify-between items-center border-b border-base-300">
+                <h3 class="font-bold text-xl text-[#00295d]">Histórico: {{ p.nome }}</h3>
+                <form method="dialog"><button class="btn btn-sm btn-circle btn-ghost">✕</button></form>
+            </div>
+            <div class="p-6">
+                <table class="table table-sm w-full tabelaModal">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Descrição</th>
+                            <th>Status</th>
+                            <th class="text-right">Pontos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in p.transacoes | sort(attribute='data', reverse=True) %}
+                        <tr>
+                            <td>{{ t.data.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>{{ t.descricao }}</td>
+                            <td>
+                                <span class="badge badge-xs p-2 font-bold 
+                                    {{ 'badge-success' if t.status == 'entregue' }}
+                                    {{ 'badge-info' if t.status == 'concluido' }}
+                                    {{ 'badge-warning' if t.status == 'pendente' }}
+                                    {{ 'badge-error' if t.status == 'reprovado' }}">
+                                    {{ t.status | upper }}
+                                </span>
+                            </td>
+                            <td class="text-right font-bold">{{ t.pontos }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </dialog>
+
+    {% endfor %}
+
+</div>
+
+<script>
+$(document).ready(function() {
+    // Configuração DataTables Principal
+    $('#tabelaPintores').DataTable({
+        language: { url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json' },
+        pageLength: 10,
+        dom: '<"flex justify-between items-center mb-4"B f>rt<"flex justify-between items-center mt-4"i p>',
+        buttons: [{
+            extend: 'excelHtml5',
+            text: '<i class="fa-solid fa-file-excel mr-2"></i> Exportar Excel',
+            className: 'btn btn-success btn-sm text-white',
+            title: 'Relatorio_PinturaFiel_Auditoria',
+            exportOptions: { columns: ':not(.no-export)' }
+        }]
+    });
+
+    // DataTables para os Modais de Histórico
+    $('.tabelaModal').DataTable({
+        language: { url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json' },
+        pageLength: 5,
+        dom: 'frtip'
+    });
+});
+</script>
+{% endblock %}

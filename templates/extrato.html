@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Extrato{% endblock %}
+{% block content %}
+  <h1 class="text-2xl font-bold mb-4">Extrato de Pontos</h1>
+  <p class="mb-4">Cliente: <span class="font-semibold">{{ user.nome }}</span></p>
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body p-0">
+      <ul class="divide-y divide-base-300">
+        {% for item in transacoes %}
+          <li class="p-4 flex justify-between items-start gap-4 {{ 'opacity-50' if item.status == 'reprovado' }}">
+            <div>
+              <p class="font-medium">
+                {{ item.descricao }}
+                {% if item.status == 'reprovado' %}
+                  <span class="text-error text-xs block">(Resgate Negado - Pontos Devolvidos)</span>
+                {% elif item.status == 'pendente' %}
+                  <span class="text-warning text-xs block">(Aguardando liberação na loja)</span>
+                {% endif %}
+              </p>
+              <p class="text-sm opacity-70">{{ item.data.strftime('%d/%m/%Y %H:%M') }}</p>
+            </div>
+            <div class="text-right">
+              <span class="text-lg font-bold {{ 'text-success' if item.pontos > 0 else 'text-error' }}">
+                {{ item.pontos }} pts
+              </span>
+              <div class="text-[10px] uppercase font-bold opacity-60">{{ item.status }}</div>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endblock %}

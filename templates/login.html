@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="flex justify-center items-center py-10">
+  <div class="card w-full max-w-sm bg-base-100 shadow-2xl">
+    <div class="card-body">
+      <h2 class="card-title justify-center text-2xl font-bold text-[#00295d]">Entrar</h2>
+      <form method="post" class="space-y-4">
+        <div class="form-control">
+          <label class="label"><span class="label-text">E-mail</span></label>
+          <input type="email" name="email" class="input input-bordered" required />
+        </div>
+        <div class="form-control">
+          <label class="label"><span class="label-text">Senha</span></label>
+          <input type="password" name="senha" class="input input-bordered" required />
+        </div>
+        <button class="btn btn-primary w-full mt-4">Acessar Conta</button>
+      </form>
+      <div class="text-center mt-4">
+        <p class="text-sm">Não tem conta? <a href="{{ url_for('register') }}" class="link link-primary">Cadastre-se aqui</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

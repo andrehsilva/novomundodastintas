@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+
+{% set aviso_retirada = transacoes | selectattr('status', 'equalto', 'concluido') | list %}
+{% if aviso_retirada %}
+<div class="alert alert-success shadow-lg mb-6">
+  <i class="fa-solid fa-gift"></i>
+  <span>Você tem prêmios prontos para retirada! Vá até a loja Mundo das Tintas.</span>
+</div>
+{% endif %}
+  <section class="grid gap-4 md:grid-cols-3">
+    <div class="card bg-primary text-primary-content shadow-xl md:col-span-2">
+      <div class="card-body">
+        <p class="opacity-90">Saldo disponível</p>
+        {% if user %}
+          <h1 class="card-title text-4xl">{{ user.saldo_total }} pontos</h1>
+          <p>{{ user.nome }} • {{ user.email }}</p>
+        {% else %}
+          <h1 class="card-title text-2xl">Sem cliente cadastrado</h1>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title">Ações rápidas</h2>
+        <a href="{{ url_for('catalogo') }}" class="btn btn-outline btn-primary">Ver catálogo</a>
+        <a href="{{ url_for('admin_usuarios') }}" class="btn btn-outline">Creditar pontos</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="mt-6 card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <h2 class="card-title">Últimas movimentações</h2>
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead><tr><th>Data</th><th>Descrição</th><th>Status</th><th>Pontos</th></tr></thead>
+          <tbody>
+            {% for item in transacoes %}
+              <tr>
+                <td>{{ item.data.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td>{{ item.descricao }}</td>
+                <td>
+                  <span class="badge badge-sm 
+                    {{ 'badge-warning' if item.status == 'pendente' }}
+                    {{ 'badge-success' if item.status == 'concluido' or item.status == 'aprovado' }}
+                    {{ 'badge-error' if item.status == 'reprovado' }}">
+                    {{ item.status | upper }}
+                  </span>
+                </td>
+                <td class="font-semibold {{ 'text-success' if item.pontos > 0 else 'text-error' }}">
+                  {{ item.pontos }}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+{% endblock %}

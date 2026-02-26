@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="corporate">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}PinturaFiel{% endblock %}</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.0/css/dataTables.tailwindcss.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.0/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/2.0.0/js/dataTables.tailwindcss.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.0/js/dataTables.buttons.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.0/js/buttons.tailwindcss.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.0/js/buttons.html5.min.js"></script>
+    
+    <style>
+        /* Estilização Customizada DataTables para o Tema Claro */
+        .dt-search input { @apply input input-bordered input-sm bg-white text-base-content !important; border-color: #d1d5db !important; }
+        .dt-paging-button { @apply btn btn-sm btn-ghost !important; background-color: white !important; color: #00295d !important; border: 1px solid #e5e7eb !important; }
+        .dt-paging-button.current { @apply btn-primary text-white !important; border: none !important; }
+        .buttons-excel { @apply btn btn-success btn-sm text-white border-none shadow-sm !important; background-color: #22c55e !important; }
+        
+        .animate-toast { animation: fadeInDown 0.5s ease-out; }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="min-h-screen bg-base-200 text-base-content font-sans">
+
+    <header class="navbar shadow-lg sticky top-0 z-50 transition-colors duration-300" style="background-color: #00295d; color: white;">
+        <div class="container mx-auto px-2 md:px-4">
+            
+            <div class="flex-1">
+                <a class="btn btn-ghost hover:bg-white/10 p-0 px-2 h-auto" href="{{ url_for('index') }}">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="PinturaFiel" class="h-14 w-auto object-contain py-1" />
+                </a>
+            </div>
+
+            <div class="flex items-center gap-1 md:gap-3">
+                {% if current_user.is_authenticated %}
+                    
+                    <nav class="hidden md:flex gap-1 items-center">
+                        {% if current_user.role == 'pintor' %}
+                            <a class="btn btn-ghost btn-sm text-white hover:bg-white/10" href="{{ url_for('index') }}">
+                                <i class="fa-solid fa-house text-blue-200"></i> Dashboard
+                            </a>
+                            <a class="btn btn-ghost btn-sm text-white hover:bg-white/10" href="{{ url_for('catalogo') }}">
+                                <i class="fa-solid fa-gift text-blue-200"></i> Prêmios
+                            </a>
+                        {% endif %}
+
+                        {% if current_user.role == 'admin' %}
+                             <a class="btn btn-ghost btn-sm text-white hover:bg-white/10" href="{{ url_for('catalogo') }}">
+                                <i class="fa-solid fa-store text-blue-200"></i> Ver Catálogo
+                            </a>
+                            <div class="dropdown dropdown-hover dropdown-end">
+                                <div tabindex="0" role="button" class="btn btn-warning btn-sm font-bold ml-2">
+                                    <i class="fa-solid fa-lock"></i> Painel Admin
+                                </div>
+                                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-xl bg-base-100 rounded-box w-52 text-base-content mt-0 border border-base-300">
+                                    <li><a href="{{ url_for('admin_usuarios') }}"><i class="fa-solid fa-users text-primary"></i> Gerenciar Usuários</a></li>
+                                    <li><a href="{{ url_for('admin_premios') }}"><i class="fa-solid fa-boxes-stacked text-primary"></i> Gerenciar Prêmios</a></li>
+                                </ul>
+                            </div>
+                        {% endif %}
+                    </nav>
+
+                    <div class="dropdown dropdown-end">
+                        <label tabindex="0" role="button" class="btn btn-ghost btn-sm text-white border border-white/20 hover:bg-white/10 ml-2">
+                            <i class="fa-solid fa-circle-user text-xl"></i>
+                            <span class="hidden sm:inline ml-1 font-medium">{{ current_user.nome.split()[0] }}</span>
+                            <i class="fa-solid fa-chevron-down text-[10px] opacity-70"></i>
+                        </label>
+                        <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-xl bg-base-100 rounded-box w-64 text-base-content mt-3 border border-base-300">
+                            
+                            <li class="menu-title md:hidden text-xs opacity-50 uppercase">Navegação</li>
+                            {% if current_user.role == 'pintor' %}
+                                <li class="md:hidden"><a href="{{ url_for('index') }}"><i class="fa-solid fa-house w-5"></i> Dashboard</a></li>
+                                <li class="md:hidden"><a href="{{ url_for('catalogo') }}"><i class="fa-solid fa-gift w-5"></i> Prêmios</a></li>
+                            {% elif current_user.role == 'admin' %}
+                                <li class="md:hidden"><a href="{{ url_for('catalogo') }}"><i class="fa-solid fa-store w-5"></i> Ver Catálogo</a></li>
+                                <li class="md:hidden"><a href="{{ url_for('admin_usuarios') }}"><i class="fa-solid fa-users w-5 text-primary"></i> Gerenciar Usuários</a></li>
+                                <li class="md:hidden"><a href="{{ url_for('admin_premios') }}"><i class="fa-solid fa-boxes-stacked w-5 text-primary"></i> Gerenciar Prêmios</a></li>
+                            {% endif %}
+                            
+                            <div class="divider md:hidden my-0"></div>
+
+                            <li class="menu-title text-xs opacity-50 uppercase">Minha Conta</li>
+                            {% if current_user.role == 'pintor' %}
+                                <li><a href="{{ url_for('extrato') }}"><i class="fa-solid fa-receipt w-5 text-primary"></i> Meu Extrato</a></li>
+                            {% endif %}
+                            
+                            <div class="divider my-0"></div>
+                            <li>
+                                <a href="{{ url_for('logout') }}" class="text-error hover:bg-error/10 font-bold">
+                                    <i class="fa-solid fa-right-from-bracket w-5"></i> Sair
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                {% else %}
+                    <div class="flex gap-2">
+                        <a href="{{ url_for('login') }}" class="btn btn-sm btn-ghost text-white hover:bg-white/10">Entrar</a>
+                        <a href="{{ url_for('register') }}" class="btn btn-sm btn-primary shadow-md border-none">Cadastrar</a>
+                    </div>
+                {% endif %}
+
+                <button class="btn btn-ghost btn-circle btn-sm text-white/70 hover:text-white ml-1" onclick="toggleTheme()">
+                    <i class="fa-solid fa-circle-half-stroke"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 max-w-6xl">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="max-w-md mx-auto">
+                    {% for category, message in messages %}
+                        <div class="alert mb-4 shadow-lg animate-toast {{ 'alert-success' if category == 'success' else 'alert-warning' if category == 'warning' else 'alert-error' if category == 'error' else 'alert-info' }}">
+                            <i class="fa-solid {{ 'fa-check-circle' if category == 'success' else 'fa-exclamation-triangle' if category == 'warning' else 'fa-circle-xmark' }}"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        const themeKey = "pf-theme";
+        const root = document.documentElement;
+        const savedTheme = localStorage.getItem(themeKey);
+        if (savedTheme) root.setAttribute("data-theme", savedTheme);
+
+        function toggleTheme() {
+            const current = root.getAttribute("data-theme") || "corporate";
+            const next = current === "corporate" ? "night" : "corporate";
+            root.setAttribute("data-theme", next);
+            localStorage.setItem(themeKey, next);
+        }
+    </script>
+</body>
+</html>

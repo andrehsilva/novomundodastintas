@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% block title %}Gestão de Prêmios - PinturaFiel{% endblock %}
+
+{% block content %}
+<div class="max-w-[98%] mx-auto space-y-6 pb-10">
+    <div class="flex justify-between items-center border-b border-base-300 pb-6">
+        <div class="flex items-center gap-4">
+            <a href="{{ url_for('admin_usuarios') }}" class="btn btn-circle btn-ghost btn-sm">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="text-3xl font-bold text-[#00295d]">Gestão de Catálogo</h1>
+                <p class="text-sm opacity-60">Gerencie os produtos disponíveis para troca de pontos.</p>
+            </div>
+        </div>
+        <button onclick="modal_novo_premio.showModal()" class="btn btn-primary text-white shadow-md">
+            <i class="fa-solid fa-plus-circle"></i> Novo Prêmio
+        </button>
+    </div>
+
+    <div class="card bg-base-100 shadow-xl border border-base-300">
+        <div class="card-body p-0">
+            <div class="overflow-x-auto w-full">
+                <table class="table table-zebra w-full table-lg">
+                    <thead class="bg-base-200 text-[#00295d]">
+                        <tr>
+                            <th class="w-24">Visualização</th>
+                            <th>Produto</th>
+                            <th>Categoria</th>
+                            <th>Valor Necessário</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prod in produtos %}
+                        <tr class="hover:bg-base-200/30 transition-colors">
+                            <td>
+                                <div class="avatar">
+                                    <div class="mask mask-squircle w-16 h-16 shadow-sm border bg-white">
+                                        {% if 'http' in prod.imagem_url %}
+                                            <img src="{{ prod.imagem_url }}" alt="{{ prod.nome }}" />
+                                        {% else %}
+                                            <img src="{{ url_for('static', filename=prod.imagem_url) }}" alt="{{ prod.nome }}" />
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="font-bold text-lg text-[#00295d]">{{ prod.nome }}</div>
+                                <div class="text-xs opacity-50 truncate max-w-xs">{{ prod.descricao }}</div>
+                            </td>
+                            <td>
+                                <span class="badge badge-ghost font-medium uppercase">{{ prod.categoria }}</span>
+                            </td>
+                            <td>
+                                <div class="font-bold text-primary flex items-center gap-1">
+                                    <i class="fa-solid fa-coins text-xs"></i>
+                                    {{ prod.valor_pontos }} <span class="text-[10px] font-normal opacity-70">pts</span>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <div class="flex justify-center gap-2">
+                                    <button onclick="document.getElementById('modal_detalhe_{{ prod.id }}').showModal()" class="btn btn-ghost btn-sm text-info">
+                                        <i class="fa-solid fa-circle-info mr-1"></i> Detalhes
+                                    </button>
+                                    
+                                    <form method="post" action="{{ url_for('excluir_produto', id=prod.id) }}" onsubmit="return confirm('Excluir permanentemente?')">
+                                        <button class="btn btn-ghost btn-sm text-error">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <dialog id="modal_detalhe_{{ prod.id }}" class="modal">
+                            <div class="modal-box w-11/12 max-w-2xl border border-base-300">
+                                <form method="dialog"><button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button></form>
+                                
+                                <div class="flex flex-col md:flex-row gap-6">
+                                    <div class="w-full md:w-1/2">
+                                        <div class="rounded-xl overflow-hidden border shadow-sm bg-white">
+                                            {% if 'http' in prod.imagem_url %}
+                                                <img src="{{ prod.imagem_url }}" class="w-full h-auto" />
+                                            {% else %}
+                                                <img src="{{ url_for('static', filename=prod.imagem_url) }}" class="w-full h-auto" />
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="w-full md:w-1/2 space-y-4">
+                                        <h3 class="font-bold text-2xl text-[#00295d]">{{ prod.nome }}</h3>
+                                        <span class="badge badge-primary">{{ prod.categoria }}</span>
+                                        <div class="text-sm leading-relaxed opacity-80">{{ prod.descricao }}</div>
+                                        <div class="divider"></div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm opacity-60">Valor de resgate:</span>
+                                            <span class="text-2xl font-black text-primary">{{ prod.valor_pontos }} pts</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <form method="dialog" class="modal-backdrop bg-black/50"><button>close</button></form>
+                        </dialog>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <dialog id="modal_novo_premio" class="modal">
+        <div class="modal-box max-w-lg border border-primary/20">
+            <form method="dialog"><button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button></form>
+            <h3 class="font-bold text-xl mb-6 text-primary flex items-center gap-2">
+                <i class="fa-solid fa-circle-plus"></i> Novo Item para o Catálogo
+            </h3>
+            
+            <form method="post" enctype="multipart/form-data" class="space-y-4">
+                <input type="hidden" name="acao" value="cadastrar_produto">
+                
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-bold">Nome do Produto</span></label>
+                    <input type="text" name="nome" placeholder="Ex: Kit de Trinchas Profissionais" class="input input-bordered w-full" required>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-bold">Pontos</span></label>
+                        <input type="number" name="valor_pontos" placeholder="1500" class="input input-bordered w-full" required min="1">
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-bold">Categoria</span></label>
+                        <input type="text" name="categoria" placeholder="Ex: Acessórios" class="input input-bordered w-full" required>
+                    </div>
+                </div>
+
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-bold">Imagem (Upload)</span></label>
+                    <input type="file" name="imagem_file" class="file-input file-input-bordered file-input-primary w-full" accept="image/*" required>
+                </div>
+
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-bold">Descrição Completa</span></label>
+                    <textarea name="descricao" class="textarea textarea-bordered h-24" placeholder="Descreva os detalhes do prêmio..." required></textarea>
+                </div>
+
+                <div class="modal-action">
+                    <button type="submit" class="btn btn-primary w-full text-white">Cadastrar Prêmio</button>
+                </div>
+            </form>
+        </div>
+        <form method="dialog" class="modal-backdrop bg-black/40"><button>close</button></form>
+    </dialog>
+</div>
+{% endblock %}

@@ -142,15 +142,38 @@
 
     <dialog id="modal_novo_usuario" class="modal">
         <div class="modal-box max-w-md border-2 border-primary/20">
-            <h3 class="font-bold text-xl mb-6 text-primary"><i class="fa-solid fa-user-plus"></i> Novo Profissional</h3>
+            <h3 class="font-bold text-xl mb-6 text-primary flex items-center gap-2">
+                <i class="fa-solid fa-user-plus"></i> Novo Profissional
+            </h3>
             <form method="post" action="{{ url_for('admin_novo_usuario') }}" class="space-y-4">
-                <input type="text" name="nome" placeholder="Nome Completo" class="input input-bordered w-full" required>
-                <input type="email" name="email" placeholder="E-mail" class="input input-bordered w-full" required>
-                <input type="text" name="cpf_cnpj" placeholder="CPF ou CNPJ" class="input input-bordered w-full" required>
-                <input type="password" name="senha" placeholder="Senha" class="input input-bordered w-full" required>
+                <div class="form-control">
+                    <input type="text" name="nome" placeholder="Nome Completo" class="input input-bordered w-full" required>
+                </div>
+                
+                <div class="form-control">
+                    <input type="text" name="telefone" placeholder="Telefone (Login)" class="input input-bordered w-full" required>
+                    <label class="label">
+                        <span class="label-text-alt opacity-60">Este será o login do pintor.</span>
+                    </label>
+                </div>
+
+                <div class="form-control">
+                    <input type="email" name="email" placeholder="E-mail (Opcional)" class="input input-bordered w-full">
+                </div>
+
+                <div class="form-control">
+                    <input type="text" name="cpf_cnpj" placeholder="CPF ou CNPJ" class="input input-bordered w-full" required>
+                </div>
+
+                <div class="form-control">
+                    <input type="password" name="senha" placeholder="Senha Inicial" class="input input-bordered w-full" required>
+                </div>
+
                 <button type="submit" class="btn btn-primary w-full text-white font-bold">Criar e Ativar</button>
             </form>
-            <form method="dialog" class="mt-2"><button class="btn btn-ghost btn-block btn-sm">Cancelar</button></form>
+            <form method="dialog" class="mt-2">
+                <button class="btn btn-ghost btn-block btn-sm">Cancelar</button>
+            </form>
         </div>
     </dialog>
 

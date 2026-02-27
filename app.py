@@ -52,24 +52,24 @@ def login():
         return redirect(url_for("index"))
         
     if request.method == "POST":
-        # Busca pelo telefone em vez de e-mail
+        # O campo 'telefone' deve bater com o 'name' no HTML
         identificador = request.form.get("telefone") 
         senha = request.form.get("senha")
         
-        # Tenta encontrar por telefone; se for admin, ainda pode tentar por e-mail
+        # Busca no banco pelo telefone (pintor) ou email (admin)
         user = User.query.filter_by(telefone=identificador).first() or \
                User.query.filter_by(email=identificador).first()
         
         if user and user.senha_hash == senha:
             if not user.ativo and user.role != 'admin':
-                flash("Sua conta aguarda ativação pelo administrador.", "warning")
+                flash("Sua conta aguarda ativação.", "warning")
                 return redirect(url_for("login"))
-                
             login_user(user)
             return redirect(url_for("index"))
         
-        flash("Telefone ou senha inválidos.", "error")
-    return render_template("login.html")
+        flash("Credenciais inválidas.", "error")
+    
+    return render_template("login.html") # Certifique-se que o arquivo existe
 
 @app.route("/register", methods=["GET", "POST"])
 def register():

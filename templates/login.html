@@ -1,34 +1,23 @@
 {% extends 'base.html' %}
-{% block title %}Recuperar Senha - PinturaFiel{% endblock %}
-
 {% block content %}
 <div class="flex justify-center items-center py-10">
-  <div class="card w-full max-w-sm bg-base-100 shadow-2xl border border-base-300">
+  <div class="card w-full max-w-sm bg-base-100 shadow-2xl border">
     <div class="card-body">
-      <div class="text-center mb-4">
-        <i class="fa-solid fa-lock-open text-4xl text-primary mb-2"></i>
-        <h2 class="text-xl font-bold text-[#00295d]">Recuperar Senha</h2>
-        <p class="text-xs opacity-70 mt-2">Informe o seu telefone para solicitar uma nova senha ao administrador.</p>
-      </div>
-
+      <h2 class="card-title justify-center text-2xl font-bold text-[#00295d]">Acessar Conta</h2>
       <form method="post" class="space-y-4">
         <div class="form-control">
-          <label class="label">
-            <span class="label-text font-semibold">Seu Telefone</span>
-          </label>
-          <input type="text" name="telefone" placeholder="(00) 00000-0000" class="input input-bordered w-full" required />
+          <label class="label"><span class="label-text font-bold">Telefone</span></label>
+          <input type="text" name="telefone" placeholder="(00) 00000-0000" class="input input-bordered" required />
         </div>
-        
-        <button type="submit" class="btn btn-primary w-full text-white">
-          Solicitar Nova Senha
-        </button>
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-bold">Senha</span>
+            <a href="{{ url_for('esqueci_senha') }}" class="label-text-alt link link-primary">Esqueci a senha?</a>
+          </label>
+          <input type="password" name="senha" class="input input-bordered" required />
+        </div>
+        <button class="btn btn-primary w-full text-white">Entrar</button>
       </form>
-
-      <div class="text-center mt-6">
-        <a href="{{ url_for('login') }}" class="btn btn-ghost btn-sm">
-          <i class="fa-solid fa-arrow-left mr-2"></i> Voltar ao Login
-        </a>
-      </div>
     </div>
   </div>
 </div>

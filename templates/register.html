@@ -5,103 +5,38 @@
 <div class="flex justify-center items-center py-8">
   <div class="card w-full max-w-lg bg-base-100 shadow-2xl border border-base-300">
     <div class="card-body p-8">
-      
       <div class="text-center mb-6">
         <h2 class="text-3xl font-bold text-[#00295d]">Crie sua conta</h2>
-        <p class="text-sm opacity-70 mt-2">Junte-se ao programa de fidelidade e transforme suas compras em prêmios.</p>
-      </div>
-
-      <div class="alert alert-info shadow-sm mb-6 text-sm">
-        <i class="fa-solid fa-circle-info"></i>
-        <span>Após o cadastro, sua conta passará por uma análise e ativação pela nossa equipe.</span>
+        <p class="text-sm opacity-70 mt-2">Transforme suas compras em prêmios.</p>
       </div>
 
       <form method="post" class="space-y-4">
-        
         <div class="form-control">
-          <label class="label">
-            <span class="label-text font-semibold">Nome Completo</span>
-          </label>
+          <label class="label"><span class="label-text font-semibold">Nome Completo</span></label>
+          <input type="text" name="nome" placeholder="Ex: João Silva" class="input input-bordered w-full" required />
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text font-semibold">Telefone (WhatsApp)</span></label>
           <div class="relative">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3 opacity-50">
-              <i class="fa-solid fa-user"></i>
-            </span>
-            <input type="text" name="nome" placeholder="Ex: João Silva" class="input input-bordered w-full pl-10" required />
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 opacity-50"><i class="fa-brands fa-whatsapp"></i></span>
+            <input type="text" name="telefone" id="reg_telefone" placeholder="(00) 00000-0000" class="input input-bordered w-full pl-10" required />
           </div>
-        </div>
-
-        <div class="form-control">
-        <label class="label">
-          <span class="label-text font-semibold">Telefone (WhatsApp)</span>
-        </label>
-        <div class="relative">
-          <span class="absolute inset-y-0 left-0 flex items-center pl-3 opacity-50">
-            <i class="fa-brands fa-whatsapp"></i>
-          </span>
-          <input type="text" name="telefone" placeholder="(00) 00000-0000" class="input input-bordered w-full pl-10" required />
-        </div>
-      </div>
-
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text font-semibold">E-mail (Opcional)</span>
-        </label>
-        <div class="relative">
-          <span class="absolute inset-y-0 left-0 flex items-center pl-3 opacity-50">
-            <i class="fa-solid fa-envelope"></i>
-          </span>
-          <input type="email" name="email" placeholder="seu@email.com" class="input input-bordered w-full pl-10" />
-        </div>
-      </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-semibold">CPF ou CNPJ</span>
-            </label>
-            <div class="relative">
-              <span class="absolute inset-y-0 left-0 flex items-center pl-3 opacity-50">
-                <i class="fa-solid fa-address-card"></i>
-              </span>
-              <input type="text" name="cpf_cnpj" placeholder="000.000.000-00" class="input input-bordered w-full pl-10" required />
-            </div>
-          </div>
-
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-semibold">Senha</span>
-            </label>
-            <div class="relative">
-              <span class="absolute inset-y-0 left-0 flex items-center pl-3 opacity-50">
-                <i class="fa-solid fa-lock"></i>
-              </span>
-              <input type="password" name="senha" placeholder="••••••••" class="input input-bordered w-full pl-10" required />
-            </div>
-          </div>
-        </div>
-
-        <div class="form-control mt-2">
-          <label class="label cursor-pointer justify-start gap-3">
-            <input type="checkbox" class="checkbox checkbox-primary checkbox-sm" required />
-            <span class="label-text text-xs">Concordo com os termos do programa de pontos.</span>
-          </label>
         </div>
 
         <div class="form-control mt-6">
-          <button type="submit" class="btn btn-primary w-full text-white shadow-lg">
-            Solicitar Cadastro
-            <i class="fa-solid fa-paper-plane ml-2"></i>
-          </button>
+          <button type="submit" class="btn btn-primary w-full text-white shadow-lg">Solicitar Cadastro</button>
         </div>
       </form>
-
-      <div class="divider">OU</div>
-      <div class="text-center">
-        <p class="text-sm">Já faz parte do clube? 
-          <a href="{{ url_for('login') }}" class="link link-primary font-bold">Acesse sua conta</a>
-        </p>
-      </div>
     </div>
   </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#reg_telefone').mask('(00) 00000-0000');
+});
+</script>
 {% endblock %}

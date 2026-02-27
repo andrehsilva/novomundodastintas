@@ -239,19 +239,24 @@ def admin_novo_usuario():
         return redirect(url_for("index"))
     
     telefone = request.form.get("telefone")
+    email_raw = request.form.get("email")
     
-    # Verifica se já existe um usuário com este telefone
+    # --- O AJUSTE ESTÁ AQUI ---
+    # Se o e-mail vier vazio do formulário, transformamos em None (NULL no banco)
+    # O SQL permite múltiplos valores NULL em colunas UNIQUE, mas não múltiplas strings vazias.
+    email = email_raw if email_raw and email_raw.strip() != "" else None
+    
     if User.query.filter_by(telefone=telefone).first():
-        flash("Este telefone já está cadastrado em outro perfil.", "error")
+        flash("Este telefone já está cadastrado.", "error")
     else:
         novo = User(
             nome=request.form.get("nome"),
-            telefone=telefone, # Identificador de login
-            email=request.form.get("email"), # Agora opcional
+            telefone=telefone,
+            email=email, # Agora passamos None ou o e-mail real
             cpf_cnpj=request.form.get("cpf_cnpj"),
             senha_hash=request.form.get("senha"),
             role='pintor',
-            ativo=True # Admin criando já nasce ativo
+            ativo=True
         )
         db.session.add(novo)
         db.session.commit()

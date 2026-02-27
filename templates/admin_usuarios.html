@@ -29,7 +29,6 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        
         {% set pendentes = transacoes_todas | selectattr('status', 'equalto', 'pendente') | list %}
         <div class="card bg-white shadow-lg border-l-4 border-l-info">
             <div class="card-body p-4">
@@ -41,7 +40,7 @@
                         <tbody>
                             {% for r in pendentes %}
                             <tr class="hover:bg-base-200/50">
-                                <td class="font-bold">{{ r.user.nome }}</td>
+                                <td class="font-bold">{{ r.user_obj.nome }}</td>
                                 <td class="italic text-xs">{{ r.descricao }}</td>
                                 <td class="text-right space-x-1">
                                     <form method="post" action="{{ url_for('admin_aprovar_resgate', id=r.id, acao='confirmar') }}" class="inline">
@@ -71,7 +70,7 @@
                         <tbody>
                             {% for r in para_entregar %}
                             <tr class="bg-success/5">
-                                <td class="font-bold">{{ r.user.nome }}</td>
+                                <td class="font-bold">{{ r.user_obj.nome }}</td>
                                 <td class="text-xs">{{ r.descricao }}</td>
                                 <td class="text-right">
                                     <form method="post" action="{{ url_for('admin_confirmar_entrega', id=r.id) }}">
@@ -94,7 +93,7 @@
                 <thead class="bg-base-200 text-[#00295d]">
                     <tr>
                         <th>Pintor</th>
-                        <th>CPF/CNPJ</th>
+                        <th>Telefone (Login)</th>
                         <th>Acumulado</th>
                         <th>Resgatado</th>
                         <th>Saldo</th>
@@ -103,12 +102,11 @@
                 </thead>
                 <tbody>
                     {% for p in pintores %}
-                    {# Cálculos: O gasto agora inclui 'concluido' (autorizado) e 'entregue' (físico) #}
                     {% set ganho = p.transacoes | rejectattr('status', 'equalto', 'reprovado') | selectattr('pontos', 'gt', 0) | map(attribute='pontos') | sum %}
                     {% set gasto = p.transacoes | selectattr('status', 'in', ['concluido', 'entregue', 'pendente']) | selectattr('pontos', 'lt', 0) | map(attribute='pontos') | sum | abs %}
                     <tr>
                         <td class="font-bold">{{ p.nome }}</td>
-                        <td class="text-xs">{{ p.cpf_cnpj }}</td>
+                        <td class="text-xs font-mono">{{ p.telefone }}</td>
                         <td class="text-success font-bold">+ {{ ganho }}</td>
                         <td class="text-error font-bold">- {{ gasto }}</td>
                         <td><div class="badge badge-neutral font-bold">{{ p.saldo_total }}</div></td>
@@ -116,21 +114,8 @@
                             <div class="flex justify-center gap-1">
                                 <button onclick="document.getElementById('modal_log_{{ p.id }}').showModal()" class="btn btn-circle btn-ghost btn-xs text-info"><i class="fa-solid fa-clock-rotate-left"></i></button>
                                 <button onclick="document.getElementById('modal_edit_{{ p.id }}').showModal()" class="btn btn-circle btn-ghost btn-xs text-warning"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="document.getElementById('modal_reset_{{ p.id }}').showModal()" class="btn btn-circle btn-ghost btn-xs text-warning" title="Resetar Senha"><i class="fa-solid fa-key"></i></button>
                                 <button onclick="document.getElementById('modal_del_{{ p.id }}').showModal()" class="btn btn-circle btn-ghost btn-xs text-error"><i class="fa-solid fa-trash"></i></button>
-                                <button onclick="document.getElementById('modal_reset_{{ p.id }}').showModal()" class="btn btn-circle btn-ghost btn-xs text-warning" title="Resetar Senha">
-                                    <i class="fa-solid fa-key"></i>
-                                </button>
-
-                                <dialog id="modal_reset_{{ p.id }}" class="modal">
-                                    <div class="modal-box max-w-sm">
-                                        <h3 class="font-bold text-lg mb-4">Nova Senha para {{ p.nome }}</h3>
-                                        <form action="{{ url_for('admin_resetar_senha', id=p.id) }}" method="POST">
-                                            <input type="text" name="nova_senha" placeholder="Digite a nova senha" class="input input-bordered w-full mb-4" required>
-                                            <button class="btn btn-warning w-full text-white">Confirmar Alteração</button>
-                                        </form>
-                                        <form method="dialog" class="mt-2"><button class="btn btn-sm btn-ghost w-full">Cancelar</button></form>
-                                    </div>
-                                </dialog>
                             </div>
                         </td>
                     </tr>
@@ -146,34 +131,20 @@
                 <i class="fa-solid fa-user-plus"></i> Novo Profissional
             </h3>
             <form method="post" action="{{ url_for('admin_novo_usuario') }}" class="space-y-4">
-                <div class="form-control">
-                    <input type="text" name="nome" placeholder="Nome Completo" class="input input-bordered w-full" required>
-                </div>
+                <input type="text" name="nome" placeholder="Nome Completo" class="input input-bordered w-full" required>
                 
                 <div class="form-control">
-                    <input type="text" name="telefone" placeholder="Telefone (Login)" class="input input-bordered w-full" required>
-                    <label class="label">
-                        <span class="label-text-alt opacity-60">Este será o login do pintor.</span>
-                    </label>
+                    <input type="text" name="telefone" id="reg_telefone" placeholder="Telefone (Login)" class="input input-bordered w-full" required>
+                    <label class="label"><span class="label-text-alt opacity-60">Este será o login do pintor.</span></label>
                 </div>
 
-                <div class="form-control">
-                    <input type="email" name="email" placeholder="E-mail (Opcional)" class="input input-bordered w-full">
-                </div>
-
-                <div class="form-control">
-                    <input type="text" name="cpf_cnpj" placeholder="CPF ou CNPJ" class="input input-bordered w-full" required>
-                </div>
-
-                <div class="form-control">
-                    <input type="password" name="senha" placeholder="Senha Inicial" class="input input-bordered w-full" required>
-                </div>
-
+                <input type="email" name="email" placeholder="E-mail (Opcional)" class="input input-bordered w-full">
+                <input type="text" name="cpf_cnpj" placeholder="CPF ou CNPJ" class="input input-bordered w-full" required>
+                <input type="password" name="senha" placeholder="Senha Inicial" class="input input-bordered w-full" required>
+                
                 <button type="submit" class="btn btn-primary w-full text-white font-bold">Criar e Ativar</button>
             </form>
-            <form method="dialog" class="mt-2">
-                <button class="btn btn-ghost btn-block btn-sm">Cancelar</button>
-            </form>
+            <form method="dialog" class="mt-2"><button class="btn btn-ghost btn-block btn-sm">Cancelar</button></form>
         </div>
     </dialog>
 
@@ -184,7 +155,7 @@
                 <input type="hidden" name="acao" value="credito_manual">
                 <select name="user_id" class="select select-bordered w-full" required>
                     <option value="" disabled selected>Selecione o pintor...</option>
-                    {% for p in pintores %}<option value="{{ p.id }}">{{ p.nome }}</option>{% endfor %}
+                    {% for p in pintores %}<option value="{{ p.id }}">{{ p.nome }} ({{ p.telefone }})</option>{% endfor %}
                 </select>
                 <input type="number" name="pontos" class="input input-bordered w-full" placeholder="Pontos" required min="1">
                 <input type="text" name="descricao" class="input input-bordered w-full" placeholder="NF ou Referência" required>
@@ -195,6 +166,17 @@
     </dialog>
 
     {% for p in pintores %}
+    <dialog id="modal_reset_{{ p.id }}" class="modal">
+        <div class="modal-box max-w-sm">
+            <h3 class="font-bold text-lg mb-4">Nova Senha para {{ p.nome }}</h3>
+            <form action="{{ url_for('admin_resetar_senha', id=p.id) }}" method="POST">
+                <input type="text" name="nova_senha" placeholder="Digite a nova senha" class="input input-bordered w-full mb-4" required>
+                <button class="btn btn-warning w-full text-white">Confirmar Alteração</button>
+            </form>
+            <form method="dialog" class="mt-2"><button class="btn btn-sm btn-ghost w-full">Cancelar</button></form>
+        </div>
+    </dialog>
+
     <dialog id="modal_log_{{ p.id }}" class="modal">
         <div class="modal-box w-11/12 max-w-4xl p-0 overflow-hidden">
             <div class="bg-base-200 p-6 flex justify-between items-center border-b border-base-300">
@@ -233,13 +215,16 @@
             </div>
         </div>
     </dialog>
-
     {% endfor %}
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 <script>
 $(document).ready(function() {
+    // Aplicar máscara de telefone
+    $('#reg_telefone').mask('(00) 00000-0000');
+
     // Configuração DataTables Principal
     $('#tabelaPintores').DataTable({
         language: { url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json' },
@@ -254,7 +239,7 @@ $(document).ready(function() {
         }]
     });
 
-    // DataTables para os Modais de Histórico
+    // DataTables para os Modais
     $('.tabelaModal').DataTable({
         language: { url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json' },
         pageLength: 5,

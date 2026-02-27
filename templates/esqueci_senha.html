@@ -8,28 +8,28 @@
       <div class="text-center mb-4">
         <i class="fa-solid fa-lock-open text-4xl text-primary mb-2"></i>
         <h2 class="text-xl font-bold text-[#00295d]">Recuperar Senha</h2>
-        <p class="text-xs opacity-70 mt-2">Informe o seu telefone para solicitar uma nova senha ao administrador.</p>
       </div>
 
       <form method="post" class="space-y-4">
         <div class="form-control">
-          <label class="label">
-            <span class="label-text font-semibold">Seu Telefone</span>
-          </label>
-          <input type="text" name="telefone" placeholder="(00) 00000-0000" class="input input-bordered w-full" required />
+          <label class="label"><span class="label-text font-semibold">Seu Telefone</span></label>
+          <input type="text" name="telefone" id="forget_telefone" placeholder="(00) 00000-0000" class="input input-bordered w-full" required />
         </div>
-        
-        <button type="submit" class="btn btn-primary w-full text-white">
-          Solicitar Nova Senha
-        </button>
+        <button type="submit" class="btn btn-primary w-full text-white">Solicitar Nova Senha</button>
       </form>
 
       <div class="text-center mt-6">
-        <a href="{{ url_for('login') }}" class="btn btn-ghost btn-sm">
-          <i class="fa-solid fa-arrow-left mr-2"></i> Voltar ao Login
-        </a>
+        <a href="{{ url_for('login') }}" class="btn btn-ghost btn-sm">Voltar ao Login</a>
       </div>
     </div>
   </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#forget_telefone').mask('(00) 00000-0000');
+});
+</script>
 {% endblock %}

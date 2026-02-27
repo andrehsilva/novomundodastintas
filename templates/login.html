@@ -7,7 +7,7 @@
       <form method="post" class="space-y-4">
         <div class="form-control">
           <label class="label"><span class="label-text font-bold">Telefone</span></label>
-          <input type="text" name="telefone" placeholder="(00) 00000-0000" class="input input-bordered" required />
+          <input type="text" name="telefone" id="login_telefone" placeholder="(00) 00000-0000" class="input input-bordered" required />
         </div>
         <div class="form-control">
           <label class="label">
@@ -21,4 +21,12 @@
     </div>
   </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#login_telefone').mask('(00) 00000-0000');
+});
+</script>
 {% endblock %}

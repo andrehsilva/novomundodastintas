@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="flex justify-center items-center py-10">
+  <div class="card w-full max-w-sm bg-base-100 shadow-2xl">
+    <div class="card-body">
+      <h2 class="card-title justify-center text-xl font-bold text-[#00295d]">Recuperar Senha</h2>
+      <p class="text-xs text-center opacity-70">Informe seu telefone cadastrado para solicitar uma nova senha à loja.</p>
+      <form method="post" class="space-y-4 mt-4">
+        <div class="form-control">
+          <label class="label"><span class="label-text">Telefone</span></label>
+          <input type="text" name="telefone" placeholder="(00) 00000-0000" class="input input-bordered" required />
+        </div>
+        <button class="btn btn-primary w-full">Solicitar Nova Senha</button>
+      </form>
+      <div class="text-center mt-4">
+        <a href="{{ url_for('login') }}" class="link link-primary text-sm">Voltar para o Login</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -5,23 +5,21 @@ from flask_login import UserMixin
 db = SQLAlchemy()
 
 class User(db.Model, UserMixin):
-    __tablename__ = 'user_tintas'  # Nome da tabela no Supabase para evitar conflitos
+    __tablename__ = 'user_tintas'
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(120), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    # Telefone agora é o identificador único para login
+    telefone = db.Column(db.String(20), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=True) # E-mail torna-se opcional
     cpf_cnpj = db.Column(db.String(20), unique=True, nullable=False)
     senha_hash = db.Column(db.String(255), nullable=False)
     saldo_total = db.Column(db.Integer, nullable=False, default=0)
-    
-    # Define se é 'admin' ou 'pintor'
     role = db.Column(db.String(20), nullable=False, default='pintor') 
-    # Controle de acesso para novos cadastros
     ativo = db.Column(db.Boolean, default=False) 
 
-    # RELACIONAMENTO CORRIGIDO:
-    # O backref="user_obj" cria automaticamente o atributo .user_obj em Transaction
     transacoes = db.relationship("Transaction", backref="user_obj", lazy=True)
 
+    
 class Product(db.Model):
     __tablename__ = 'product_tintas'
     id = db.Column(db.Integer, primary_key=True)

@@ -44,15 +44,21 @@ def load_user(user_id):
 
 # --- Rotas de Autenticação ---
 
+# ... (imports e configurações iniciais permanecem os mesmos)
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for("index"))
         
     if request.method == "POST":
-        email = request.form.get("email")
+        # Busca pelo telefone em vez de e-mail
+        identificador = request.form.get("telefone") 
         senha = request.form.get("senha")
-        user = User.query.filter_by(email=email).first()
+        
+        # Tenta encontrar por telefone; se for admin, ainda pode tentar por e-mail
+        user = User.query.filter_by(telefone=identificador).first() or \
+               User.query.filter_by(email=identificador).first()
         
         if user and user.senha_hash == senha:
             if not user.ativo and user.role != 'admin':
@@ -62,24 +68,20 @@ def login():
             login_user(user)
             return redirect(url_for("index"))
         
-        flash("E-mail ou senha inválidos.", "error")
+        flash("Telefone ou senha inválidos.", "error")
     return render_template("login.html")
-
-@app.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for("login"))
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        if User.query.filter_by(email=request.form.get("email")).first():
-            flash("Este e-mail já está cadastrado.", "error")
+        telefone = request.form.get("telefone")
+        if User.query.filter_by(telefone=telefone).first():
+            flash("Este telefone já está cadastrado.", "error")
             return redirect(url_for("register"))
 
         novo_usuario = User(
             nome=request.form.get("nome"),
+            telefone=telefone, # Salva o telefone
             email=request.form.get("email"),
             cpf_cnpj=request.form.get("cpf_cnpj"),
             senha_hash=request.form.get("senha"), 
@@ -88,10 +90,48 @@ def register():
         )
         db.session.add(novo_usuario)
         db.session.commit()
-        flash("Cadastro realizado com sucesso! Aguarde a ativação pela loja.", "info")
+        flash("Cadastro realizado! Aguarde a ativação pela loja.", "info")
         return redirect(url_for("login"))
     
     return render_template("register.html")
+
+# ... (restante do arquivo permanece igual)
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("login"))
+
+
+# Rota para o Pintor solicitar a recuperação
+@app.route("/esqueci-senha", methods=["GET", "POST"])
+def esqueci_senha():
+    if request.method == "POST":
+        telefone = request.form.get("telefone")
+        user = User.query.filter_by(telefone=telefone).first()
+        if user:
+            # Aqui simulamos um alerta. No futuro, você pode integrar com Evolution API
+            flash("Solicitação enviada! Entre em contato com a loja para receber sua nova senha.", "info")
+        else:
+            flash("Telefone não encontrado.", "error")
+    return render_template("esqueci_senha.html")
+
+# Rota para o Admin resetar a senha manualmente
+@app.route("/admin/usuarios/resetar-senha/<int:id>", methods=["POST"])
+@login_required
+def admin_resetar_senha(id):
+    if current_user.role != 'admin': return redirect(url_for("index"))
+    
+    user = User.query.get_or_404(id)
+    nova_senha = request.form.get("nova_senha")
+    
+    if nova_senha:
+        user.senha_hash = nova_senha # Atualiza a senha no banco
+        db.session.commit()
+        flash(f"Senha de {user.nome} alterada com sucesso!", "success")
+    
+    return redirect(url_for("admin_usuarios"))
 
 # --- Funções Auxiliares ---
 

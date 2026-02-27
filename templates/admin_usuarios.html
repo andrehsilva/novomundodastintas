@@ -117,6 +117,20 @@
                                 <button onclick="document.getElementById('modal_log_{{ p.id }}').showModal()" class="btn btn-circle btn-ghost btn-xs text-info"><i class="fa-solid fa-clock-rotate-left"></i></button>
                                 <button onclick="document.getElementById('modal_edit_{{ p.id }}').showModal()" class="btn btn-circle btn-ghost btn-xs text-warning"><i class="fa-solid fa-pen"></i></button>
                                 <button onclick="document.getElementById('modal_del_{{ p.id }}').showModal()" class="btn btn-circle btn-ghost btn-xs text-error"><i class="fa-solid fa-trash"></i></button>
+                                <button onclick="document.getElementById('modal_reset_{{ p.id }}').showModal()" class="btn btn-circle btn-ghost btn-xs text-warning" title="Resetar Senha">
+                                    <i class="fa-solid fa-key"></i>
+                                </button>
+
+                                <dialog id="modal_reset_{{ p.id }}" class="modal">
+                                    <div class="modal-box max-w-sm">
+                                        <h3 class="font-bold text-lg mb-4">Nova Senha para {{ p.nome }}</h3>
+                                        <form action="{{ url_for('admin_resetar_senha', id=p.id) }}" method="POST">
+                                            <input type="text" name="nova_senha" placeholder="Digite a nova senha" class="input input-bordered w-full mb-4" required>
+                                            <button class="btn btn-warning w-full text-white">Confirmar Alteração</button>
+                                        </form>
+                                        <form method="dialog" class="mt-2"><button class="btn btn-sm btn-ghost w-full">Cancelar</button></form>
+                                    </div>
+                                </dialog>
                             </div>
                         </td>
                     </tr>

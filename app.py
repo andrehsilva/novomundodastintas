@@ -326,7 +326,27 @@ def ativar_usuario(id):
     flash(f"Pintor {u.nome} ativado!", "success")
     return redirect(url_for("admin_usuarios")) # CORRIGIDO: Redireciona para usuarios
 
+# --- Inicialização ---
 
+def seed_data() -> None:
+    admin = User.query.filter_by(email="admin@admin.com").first()
+    if not admin:
+        admin_user = User(
+            nome="Administrador", email="admin@admin.com", cpf_cnpj="00000000000",
+            senha_hash="admin", role="admin", ativo=True, saldo_total=0
+        )
+        db.session.add(admin_user)
+        db.session.commit()
+
+    if Product.query.count() == 0:
+        produtos_iniciais = [
+            Product(nome="Vale Compras R$ 50", descricao="Use no próximo pedido.", valor_pontos=2000, 
+                    imagem_url="https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?w=400", categoria="Vale"),
+            Product(nome="Kit Pintura Premium", descricao="Profissional completo.", valor_pontos=3500, 
+                    imagem_url="https://images.unsplash.com/photo-1631209121750-a9f656d8f7e6?w=400", categoria="Ferramenta"),
+        ]
+        db.session.add_all(produtos_iniciais)
+        db.session.commit()
 
 
 @app.route("/resgatar/<int:produto_id>", methods=["POST"])

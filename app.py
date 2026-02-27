@@ -238,13 +238,16 @@ def admin_novo_usuario():
     if current_user.role != 'admin':
         return redirect(url_for("index"))
     
-    email = request.form.get("email")
-    if User.query.filter_by(email=email).first():
-        flash("E-mail já cadastrado.", "error")
+    telefone = request.form.get("telefone")
+    
+    # Verifica se já existe um usuário com este telefone
+    if User.query.filter_by(telefone=telefone).first():
+        flash("Este telefone já está cadastrado em outro perfil.", "error")
     else:
         novo = User(
             nome=request.form.get("nome"),
-            email=email,
+            telefone=telefone, # Identificador de login
+            email=request.form.get("email"), # Agora opcional
             cpf_cnpj=request.form.get("cpf_cnpj"),
             senha_hash=request.form.get("senha"),
             role='pintor',
@@ -252,7 +255,8 @@ def admin_novo_usuario():
         )
         db.session.add(novo)
         db.session.commit()
-        flash(f"Usuário {novo.nome} criado com sucesso!", "success")
+        flash(f"Profissional {novo.nome} cadastrado com sucesso!", "success")
+    
     return redirect(url_for("admin_usuarios"))
 
 @app.route("/admin/usuarios/editar/<int:id>", methods=["POST"])

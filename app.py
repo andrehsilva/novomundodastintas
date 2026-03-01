@@ -207,7 +207,48 @@ def extrato():
     )
     return render_template("extrato.html", user=current_user, transacoes=transacoes)
 
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for("index"))
+        
+    if request.method == "POST":
+        telefone = request.form.get("telefone")
+        email_raw = request.form.get("email")
+        
+        # Garante que e-mail vazio seja salvo como NULL no Supabase
+        email = email_raw if email_raw and email_raw.strip() != "" else None
+        
+        # Verifica se o telefone já existe para evitar erro de duplicidade
+        if User.query.filter_by(telefone=telefone).first():
+            flash("Este telefone já está cadastrado no sistema.", "error")
+            return redirect(url_for("register"))
+
+        novo_usuario = User(
+            nome=request.form.get("nome"),
+            telefone=telefone,
+            email=email,
+            cpf_cnpj=request.form.get("cpf_cnpj"),
+            senha_hash=request.form.get("senha"), 
+            role='pintor',
+            ativo=False # Novos cadastros começam inativos para análise
+        )
+        
+        try:
+            db.session.add(novo_usuario)
+            db.session.commit()
+            flash("Cadastro solicitado com sucesso! Aguarde a ativação pela loja.", "info")
+            return redirect(url_for("login"))
+        except Exception as e:
+            db.session.rollback()
+            flash("Erro ao processar cadastro. Verifique os dados.", "error")
+            return redirect(url_for("register"))
+    
+    return render_template("register.html")
+
 # --- Painel Administrativo ---
+
 
 @app.route("/admin/usuarios", methods=["GET", "POST"])
 @login_required

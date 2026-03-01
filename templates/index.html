@@ -69,10 +69,16 @@
           Resgatar Prêmios
         </a>
         
-        <div class="pt-4 mt-4 border-t border-dashed border-slate-200 text-center">
-            <p class="text-[10px] text-slate-400 font-bold uppercase">Suporte ao Pintor</p>
-            <p class="text-xs text-slate-500 mt-1 italic font-medium">Dúvidas? Procure o gerente da loja.</p>
-        </div>
+        <div class="pt-4 mt-4 border-t border-dashed border-slate-200 text-center space-y-3">
+          <div>
+              <p class="text-[10px] text-slate-400 font-bold uppercase">Suporte ao Pintor</p>
+              <p class="text-xs text-slate-500 mt-1 italic font-medium">Dúvidas? Procure o gerente da loja.</p>
+          </div>
+          <a href="{{ url_for('regulamento') }}" class="btn btn-ghost btn-xs text-[#00295d] hover:bg-slate-100 font-bold gap-2">
+              <i class="fa-solid fa-file-invoice"></i>
+              Ver Regulamento
+          </a>
+      </div>
       </div>
     </div>
   </section>

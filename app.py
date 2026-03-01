@@ -315,14 +315,14 @@ def index():
     if current_user.role == 'admin':
         return redirect(url_for("admin_usuarios"))
     
-    # Lógica de Ranking: Conta quantos usuários ativos têm saldo estritamente maior
     posicao_superior = User.query.filter(
         User.role == 'pintor',
         User.ativo == True,
         User.saldo_total > current_user.saldo_total
     ).count()
 
-    transacoes = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.data.desc()).limit(10).all()
+    # Removido o .limit(10) para mostrar o histórico completo
+    transacoes = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.data.desc()).all()
     
     return render_template("index.html", 
                            user=current_user, 

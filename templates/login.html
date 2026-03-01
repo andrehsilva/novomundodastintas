@@ -1,58 +1,63 @@
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login</title>
 
-<script>
-  function maskBehavior(val) {
-    // remove tudo que não for dígito
-    const digits = val.replace(/\D/g, '');
-    // 11 dígitos -> celular / 10 dígitos -> fixo
-    return (digits.length > 10) ? '(00) 00000-0000' : '(00) 0000-0000';
-  }
+  <!-- Se você usa Tailwind/Daisy via CDN no base, coloque aqui também -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+</head>
 
-  const maskOptions = {
-    onKeyPress: function(val, e, field, options) {
-      field.mask(maskBehavior(val), options);
-    }
-  };
+<body class="bg-base-200">
+  <div class="flex justify-center items-center min-h-screen p-4">
+    <div class="card w-full max-w-sm bg-base-100 shadow-2xl border">
+      <div class="card-body">
+        <h2 class="card-title justify-center text-2xl font-bold text-[#00295d]">Acessar Conta</h2>
 
-  $(document).ready(function() {
-    const $tel = $('#login_telefone');
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="space-y-2">
+              {% for category, message in messages %}
+                <div class="alert {% if category == 'error' %}alert-error{% elif category == 'warning' %}alert-warning{% else %}alert-info{% endif %}">
+                  <span>{{ message }}</span>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
 
-    // Aplica máscara dinâmica
-    $tel.mask(maskBehavior($tel.val()), maskOptions);
+        <form method="post" class="space-y-4">
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Telefone</span></label>
+            <input type="text" name="telefone" id="login_telefone"
+                   placeholder="(00) 00000-0000" class="input input-bordered" required />
+          </div>
 
-    // Bloqueia letras/símbolos (permite apenas teclas de navegação e backspace)
-    $tel.on('keydown', function(e) {
-      const allowed = [
-        'Backspace','Delete','Tab','Escape','Enter',
-        'ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'
-      ];
-      if (allowed.includes(e.key)) return;
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-bold">Senha</span>
+              <a href="{{ url_for('esqueci_senha') }}" class="label-text-alt link link-primary">Esqueci a senha?</a>
+            </label>
+            <input type="password" name="senha" class="input input-bordered" required />
+          </div>
 
-      // permite Ctrl/Cmd + A/C/V/X
-      if ((e.ctrlKey || e.metaKey) && ['a','c','v','x'].includes(e.key.toLowerCase())) return;
+          <button class="btn btn-primary w-full text-white">Entrar</button>
+        </form>
+      </div>
+    </div>
+  </div>
 
-      // permite apenas números
-      if (!/^\d$/.test(e.key)) e.preventDefault();
-    });
-
-    // Se colar algo, limpa para somente dígitos e remasca
-    $tel.on('paste', function() {
-      setTimeout(() => {
-        const digits = $tel.val().replace(/\D/g, '');
-        $tel.val(digits);
-        $tel.mask(maskBehavior($tel.val()), maskOptions);
-      }, 0);
-    });
-
-    // Validação final ao enviar: obriga 10 ou 11 dígitos
-    $tel.closest('form').on('submit', function(e) {
-      const digits = $tel.val().replace(/\D/g, '');
-      if (!(digits.length === 10 || digits.length === 11)) {
-        e.preventDefault();
-        alert('Digite um telefone válido com DDD (10 ou 11 números).');
-        $tel.focus();
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+  <script>
+    // Blinda caso o CDN falhe
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.jQuery && jQuery.fn && jQuery.fn.mask) {
+        $('#login_telefone').mask('(00) 00000-0000');
       }
     });
-  });
-</script>
+  </script>
+</body>
+</html>

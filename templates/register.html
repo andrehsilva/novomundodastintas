@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="flex justify-center items-center min-h-screen p-4 md:p-10">
+<div class="flex justify-center items-center min-h-screen bg-gradient-to-tr from-slate-100 via-slate-50 to-blue-100 p-4 md:p-10">
   <div class="card w-full max-w-lg bg-base-100 shadow-2xl border border-white overflow-hidden rounded-3xl transition-all">
     
     <div class="bg-[#00295d] p-10 text-center relative">
@@ -89,7 +89,14 @@
           </div>
         </div>
 
-        <button type="submit" class="btn bg-[#00295d] hover:bg-blue-900 border-none w-full text-white text-lg font-black shadow-xl shadow-blue-900/20 py-4 h-auto rounded-2xl transition-all hover:-translate-y-1 mt-6 uppercase tracking-widest">
+        <div class="text-center">
+          <p class="text-[10px] text-slate-400 font-medium">
+            Ao solicitar o cadastro, você declara estar de acordo com o 
+            <a href="{{ url_for('regulamento') }}" class="text-[#00295d] font-bold underline">Regulamento do Programa</a>.
+          </p>
+        </div>
+
+        <button type="submit" class="btn bg-[#00295d] hover:bg-blue-900 border-none w-full text-white text-lg font-black shadow-xl shadow-blue-900/20 py-4 h-auto rounded-2xl transition-all hover:-translate-y-1 mt-2 uppercase tracking-widest">
             Solicitar Cadastro
         </button>
       </form>
@@ -128,12 +135,12 @@
     // Máscara CPF/CNPJ Dinâmica
     var options = {
         onKeyPress: function (val, e, field, options) {
-            var masks = ['000.000.000-000', '00.000.000/0000-00'];
+            var masks = ['000.000.000-00', '00.000.000/0000-00'];
             var mask = (val.length > 14) ? masks[1] : masks[0];
             $('#reg_cpf').mask(mask, options);
         }
     };
-    $('#reg_cpf').mask('000.000.000-000', options);
+    $('#reg_cpf').mask('000.000.000-00', options);
 
     // Validação no Envio
     $('#registerForm').on('submit', function (e) {

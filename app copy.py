@@ -2,23 +2,31 @@ import csv
 import os
 from datetime import datetime
 from io import StringIO
+
 from flask import Flask, flash, redirect, render_template, request, url_for
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from models import Product, Transaction, User, db
+
 from supabase import create_client
 
-# --- Inicialização ---
+# Inicializa o cliente Supabase
 supabase_url = os.getenv("SUPABASE_URL")
 supabase_key = os.getenv("SUPABASE_KEY")
 supabase = create_client(supabase_url, supabase_key)
 bucket_name = "premios_tintas"
 
+
+
 app = Flask(__name__)
+#app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
+# app.py
+# Altere a linha da URI para:
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-key")
 db.init_app(app)
 
+# --- Configuração do Flask-Login ---
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
@@ -26,11 +34,104 @@ login_manager.login_view = "login"
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    """Verifica se a extensão do arquivo é permitida."""
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+# --- Rotas de Autenticação ---
+
+# ... (imports e configurações iniciais permanecem os mesmos)
+
+# --- Rota de Login por Telefone ---
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        identificador = request.form.get("telefone")
+        senha = request.form.get("senha")
+        user = User.query.filter_by(telefone=identificador).first() or \
+               User.query.filter_by(email=identificador).first()
+        
+        if user and user.senha_hash == senha:
+            if not user.ativo and user.role != 'admin':
+                flash("Aguarde a ativação da sua conta.", "warning")
+                return redirect(url_for("login"))
+            login_user(user)
+            return redirect(url_for("index"))
+        flash("Credenciais inválidas.", "error")
+    return render_template("login.html")
+
+# --- Cadastro de Novo Profissional (Admin) ---
+@app.route("/admin/usuarios/novo", methods=["POST"])
+@login_required
+def admin_novo_usuario():
+    if current_user.role != 'admin': return redirect(url_for("index"))
+    
+    telefone = request.form.get("telefone")
+    email_raw = request.form.get("email")
+    
+    # Transforma string vazia em None para o banco aceitar
+    email = email_raw if email_raw and email_raw.strip() != "" else None
+    
+    if User.query.filter_by(telefone=telefone).first():
+        flash("Este telefone já está cadastrado.", "error")
+    else:
+        novo = User(
+            nome=request.form.get("nome"),
+            telefone=telefone,
+            email=email,
+            cpf_cnpj=request.form.get("cpf_cnpj") or None,
+            senha_hash=request.form.get("senha") or None,
+            role='pintor',
+            ativo=True
+        )
+        db.session.add(novo)
+        db.session.commit()
+        flash(f"Profissional {novo.nome} cadastrado com sucesso!", "success")
+    return redirect(url_for("admin_usuarios"))
+
+
+
+# ... (restante do arquivo permanece igual)
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("login"))
+
+
+# Rota para o Pintor solicitar a recuperação
+@app.route("/esqueci-senha", methods=["GET", "POST"])
+def esqueci_senha():
+    if request.method == "POST":
+        telefone = request.form.get("telefone")
+        user = User.query.filter_by(telefone=telefone).first()
+        if user:
+            # Aqui simulamos um alerta. No futuro, você pode integrar com Evolution API
+            flash("Solicitação enviada! Entre em contato com a loja para receber sua nova senha.", "info")
+        else:
+            flash("Telefone não encontrado.", "error")
+    return render_template("esqueci_senha.html")
+
+# Rota para o Admin resetar a senha manualmente
+@app.route("/admin/usuarios/resetar-senha/<int:id>", methods=["POST"])
+@login_required
+def admin_resetar_senha(id):
+    if current_user.role != 'admin': return redirect(url_for("index"))
+    
+    user = User.query.get_or_404(id)
+    nova_senha = request.form.get("nova_senha")
+    
+    if nova_senha:
+        user.senha_hash = nova_senha # Atualiza a senha no banco
+        db.session.commit()
+        flash(f"Senha de {user.nome} alterada com sucesso!", "success")
+    
+    return redirect(url_for("admin_usuarios"))
 
 # --- Funções Auxiliares ---
 
@@ -50,104 +151,132 @@ def parse_int(value, default=0) -> int:
     except (TypeError, ValueError):
         return default
 
-def seed_data() -> None:
-    admin = User.query.filter_by(role="admin").first()
-    if not admin:
-        admin_user = User(
-            nome="Administrador", email="admin@admin.com", cpf_cnpj="000.000.000-00",
-            telefone="00000000000", senha_hash="admin", role="admin", ativo=True
-        )
-        db.session.add(admin_user)
-        db.session.commit()
+# --- Rotas Principais ---
 
-# --- Rotas de Autenticação ---
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
+@app.route("/")
+def index():
     if current_user.is_authenticated:
-        return redirect(url_for("index"))
-    if request.method == "POST":
-        identificador = request.form.get("telefone")
-        senha = request.form.get("senha")
-        user = User.query.filter_by(telefone=identificador).first() or \
-               User.query.filter_by(email=identificador).first()
-        if user and user.senha_hash == senha:
-            if not user.ativo and user.role != 'admin':
-                flash("Aguarde a ativação da sua conta.", "warning")
-                return redirect(url_for("login"))
-            login_user(user)
-            return redirect(url_for("index"))
-        flash("Credenciais inválidas.", "error")
-    return render_template("login.html")
+        # Se for admin, redireciona para a gestão de usuários (trava a dashboard)
+        if current_user.role == 'admin':
+            return redirect(url_for("admin_usuarios"))
+            
+        # Se for pintor, mostra a dashboard normal
+        transacoes = (
+            Transaction.query.filter_by(user_id=current_user.id)
+            .order_by(Transaction.data.desc())
+            .limit(10)
+            .all()
+        )
+        return render_template("index.html", user=current_user, transacoes=transacoes)
+    
+    # Se não estiver logado, mostra o catálogo para visitantes
+    return redirect(url_for("catalogo"))
 
-@app.route("/logout")
+@app.route("/catalogo")
+def catalogo():
+    categoria_slug = request.args.get('categoria')
+    ordem = request.args.get('ordem')
+
+    query = Product.query
+    if categoria_slug:
+        query = query.filter_by(categoria=categoria_slug)
+
+    if ordem == 'asc':
+        query = query.order_by(Product.valor_pontos.asc())
+    elif ordem == 'desc':
+        query = query.order_by(Product.valor_pontos.desc())
+    else:
+        query = query.order_by(Product.valor_pontos.asc())
+
+    produtos = query.all()
+    categorias = [c[0] for c in db.session.query(Product.categoria).distinct().all()]
+
+    return render_template("catalogo.html", 
+                           produtos=produtos, 
+                           categorias=categorias, 
+                           categoria_atual=categoria_slug, 
+                           ordem_atual=ordem)
+
+@app.route("/extrato")
 @login_required
-def logout():
-    logout_user()
-    return redirect(url_for("login"))
+def extrato():
+    transacoes = (
+        Transaction.query.filter_by(user_id=current_user.id)
+        .order_by(Transaction.data.desc())
+        .all()
+    )
+    return render_template("extrato.html", user=current_user, transacoes=transacoes)
 
-@app.route("/esqueci-senha", methods=["GET", "POST"])
-def esqueci_senha():
-    if request.method == "POST":
-        telefone = request.form.get("telefone")
-        user = User.query.filter_by(telefone=telefone).first()
-        if user:
-            flash("Solicitação enviada! Entre em contato com a loja.", "info")
-        else:
-            flash("Telefone não encontrado.", "error")
-    return render_template("esqueci_senha.html")
-
-# --- Painel Administrativo: Usuários ---
+# --- Painel Administrativo ---
 
 @app.route("/admin/usuarios", methods=["GET", "POST"])
 @login_required
 def admin_usuarios():
-    if current_user.role != 'admin': return redirect(url_for("index"))
-    if request.method == "POST" and request.form.get("acao") == "credito_manual":
-        alvo = User.query.get(request.form.get("user_id"))
-        pts = parse_int(request.form.get("pontos"))
-        if alvo and pts != 0:
-            registrar_transacao(alvo, pts, request.form.get("descricao", "Crédito manual"))
-            db.session.commit()
-            flash(f"Pontos creditados para {alvo.nome}!", "success")
+    if current_user.role != 'admin':
+        return redirect(url_for("index"))
+
+    if request.method == "POST":
+        acao = request.form.get("acao")
+        if acao == "credito_manual":
+            user_id = request.form.get("user_id")
+            pontos = parse_int(request.form.get("pontos"), 0)
+            alvo = User.query.get(user_id)
+            if alvo and pontos != 0:
+                registrar_transacao(alvo, pontos, request.form.get("descricao", "Crédito manual"))
+                db.session.commit()
+                flash(f"Pontos creditados para {alvo.nome}!", "success")
         return redirect(url_for("admin_usuarios"))
-    
-    pintores = User.query.filter_by(role='pintor').all()
+
+    pintores = User.query.filter_by(role='pintor', ativo=True).all()
+    pendentes = User.query.filter_by(role='pintor', ativo=False).all()
     transacoes = Transaction.query.order_by(Transaction.data.desc()).all()
-    return render_template("admin_usuarios.html", pintores=pintores, transacoes_todas=transacoes)
+    return render_template("admin_usuarios.html", pintores=pintores, pintores_pendentes=pendentes, transacoes_todas=transacoes)
 
 @app.route("/admin/usuarios/novo", methods=["POST"])
 @login_required
 def admin_novo_usuario():
-    if current_user.role != 'admin': return redirect(url_for("index"))
-    tel = request.form.get("telefone")
+    if current_user.role != 'admin':
+        return redirect(url_for("index"))
+    
+    telefone = request.form.get("telefone")
     email_raw = request.form.get("email")
+    
+    # --- O AJUSTE ESTÁ AQUI ---
+    # Se o e-mail vier vazio do formulário, transformamos em None (NULL no banco)
+    # O SQL permite múltiplos valores NULL em colunas UNIQUE, mas não múltiplas strings vazias.
     email = email_raw if email_raw and email_raw.strip() != "" else None
     
-    if User.query.filter_by(telefone=tel).first():
+    if User.query.filter_by(telefone=telefone).first():
         flash("Este telefone já está cadastrado.", "error")
     else:
         novo = User(
-            nome=request.form.get("nome"), telefone=tel, email=email,
-            cpf_cnpj=request.form.get("cpf_cnpj") or None,
-            senha_hash=request.form.get("senha") or None,
-            role='pintor', ativo=True
+            nome=request.form.get("nome"),
+            telefone=telefone,
+            email=email, # Agora passamos None ou o e-mail real
+            cpf_cnpj=request.form.get("cpf_cnpj"),
+            senha_hash=request.form.get("senha"),
+            role='pintor',
+            ativo=True
         )
         db.session.add(novo)
         db.session.commit()
         flash(f"Profissional {novo.nome} cadastrado com sucesso!", "success")
+    
     return redirect(url_for("admin_usuarios"))
 
 @app.route("/admin/usuarios/editar/<int:id>", methods=["POST"])
 @login_required
 def admin_editar_usuario(id):
-    if current_user.role != 'admin': return redirect(url_for("index"))
+    if current_user.role != 'admin':
+        return redirect(url_for("index"))
+    
     u = User.query.get_or_404(id)
     u.nome = request.form.get("nome")
-    u.email = request.form.get("email") if request.form.get("email") else None
+    u.email = request.form.get("email")
     u.cpf_cnpj = request.form.get("cpf_cnpj")
-    if request.form.get("senha"):
+    if request.form.get("senha"): # Só altera senha se preenchido
         u.senha_hash = request.form.get("senha")
+    
     db.session.commit()
     flash("Dados atualizados!", "success")
     return redirect(url_for("admin_usuarios"))
@@ -155,7 +284,9 @@ def admin_editar_usuario(id):
 @app.route("/admin/usuarios/deletar/<int:id>", methods=["POST"])
 @login_required
 def admin_deletar_usuario(id):
-    if current_user.role != 'admin': return redirect(url_for("index"))
+    if current_user.role != 'admin':
+        return redirect(url_for("index"))
+    
     u = User.query.get_or_404(id)
     if u.id == current_user.id:
         flash("Você não pode deletar sua própria conta.", "error")
@@ -165,131 +296,157 @@ def admin_deletar_usuario(id):
         flash("Usuário removido.", "warning")
     return redirect(url_for("admin_usuarios"))
 
-@app.route("/ativar_usuario/<int:id>", methods=["POST"])
-@login_required
-def ativar_usuario(id):
-    if current_user.role != 'admin': return redirect(url_for("index"))
-    u = User.query.get_or_404(id)
-    u.ativo = True
-    db.session.commit()
-    flash(f"Pintor {u.nome} ativado!", "success")
-    return redirect(url_for("admin_usuarios"))
 
-@app.route("/admin/usuarios/resetar-senha/<int:id>", methods=["POST"])
-@login_required
-def admin_resetar_senha(id):
-    if current_user.role != 'admin': return redirect(url_for("index"))
-    user = User.query.get_or_404(id)
-    nova = request.form.get("nova_senha")
-    if nova:
-        user.senha_hash = nova
-        db.session.commit()
-        flash(f"Senha de {user.nome} alterada!", "success")
-    return redirect(url_for("admin_usuarios"))
-
-# --- Painel Administrativo: Prêmios ---
 
 @app.route("/admin/premios", methods=["GET", "POST"])
 @login_required
 def admin_premios():
-    if current_user.role != 'admin': return redirect(url_for("index"))
-    if request.method == "POST":
-        file = request.files.get("imagem_file")
-        img_url = "https://via.placeholder.com/400"
-        if file and allowed_file(file.filename):
-            filename = f"{datetime.now().timestamp()}_{file.filename}"
-            filepath = f"public/{filename}"
-            supabase.storage.from_(bucket_name).upload(filepath, file.read())
-            img_url = supabase.storage.from_(bucket_name).get_public_url(filepath)
+    if current_user.role != 'admin':
+        return redirect(url_for("index"))
 
-        novo = Product(
-            nome=request.form.get("nome"),
-            descricao=request.form.get("descricao"),
-            valor_pontos=parse_int(request.form.get("valor_pontos")),
-            categoria=request.form.get("categoria"),
-            imagem_url=img_url
-        )
-        db.session.add(novo)
-        db.session.commit()
-        flash("Prêmio cadastrado!", "success")
-        return redirect(url_for("admin_premios"))
-    
+    if request.method == "POST":
+        acao = request.form.get("acao")
+        if acao == "cadastrar_produto":
+            file = request.files.get("imagem_file")
+            if file and allowed_file(file.filename):
+                # ... lógica de upload para o Supabase ...
+                filename = f"{datetime.now().timestamp()}_{file.filename}"
+                filepath = f"public/{filename}"
+                content = file.read()
+                supabase.storage.from_(bucket_name).upload(filepath, content)
+                imagem_url = supabase.storage.from_(bucket_name).get_public_url(filepath)
+
+                novo = Product(
+                    nome=request.form.get("nome"),
+                    descricao=request.form.get("descricao"),
+                    valor_pontos=parse_int(request.form.get("valor_pontos"), 0),
+                    categoria=request.form.get("categoria"),
+                    imagem_url=imagem_url
+                )
+                db.session.add(novo)
+                db.session.commit()
+                flash("Prêmio cadastrado!", "success")
+                return redirect(url_for("admin_premios")) # Retorno após POST
+            else:
+                flash("Arquivo inválido.", "error")
+                return redirect(url_for("admin_premios")) # Retorno após erro no arquivo
+
+    # --- OBRIGATÓRIO: Retorno para o método GET ---
+    # Este comando deve estar alinhado com o primeiro 'if'
     produtos = Product.query.order_by(Product.nome).all()
     return render_template("admin_premios.html", produtos=produtos)
+
+
+@app.route("/admin/confirmar_entrega/<int:id>", methods=["POST"])
+@login_required
+def admin_confirmar_entrega(id):
+    if current_user.role != 'admin':
+        return redirect(url_for("index"))
+    
+    t = Transaction.query.get_or_404(id)
+    t.status = 'entregue'  # Atualiza para o status final de entrega física
+    db.session.commit()
+    
+    flash(f"Entrega do prêmio '{t.descricao}' registrada com sucesso!", "success")
+    return redirect(url_for("admin_usuarios"))
 
 @app.route("/admin/excluir_produto/<int:id>", methods=["POST"])
 @login_required
 def excluir_produto(id):
-    if current_user.role != 'admin': return redirect(url_for("index"))
-    p = Product.query.get_or_404(id)
-    db.session.delete(p)
+    if current_user.role != 'admin':
+        return redirect(url_for("index"))
+    
+    produto = Product.query.get_or_404(id)
+    nome_prod = produto.nome
+    db.session.delete(produto)
     db.session.commit()
-    flash("Produto removido!", "warning")
-    return redirect(url_for("admin_premios"))
+    flash(f"Produto '{nome_prod}' removido do catálogo.", "warning")
+    return redirect(url_for("admin_premios")) # CORRIGIDO: Redireciona para premios
 
-# --- Fluxo de Resgates ---
+@app.route("/ativar_usuario/<int:id>", methods=["POST"])
+@login_required
+def ativar_usuario(id):
+    if current_user.role != 'admin':
+        return redirect(url_for("index"))
+    
+    u = User.query.get_or_404(id)
+    u.ativo = True
+    db.session.commit()
+    flash(f"Pintor {u.nome} ativado!", "success")
+    return redirect(url_for("admin_usuarios")) # CORRIGIDO: Redireciona para usuarios
+
+# --- Inicialização ---
+
+def seed_data() -> None:
+    admin = User.query.filter_by(email="admin@admin.com").first()
+    if not admin:
+        admin_user = User(
+            nome="Administrador", email="admin@admin.com", cpf_cnpj="00000000000",
+            senha_hash="admin", role="admin", ativo=True, saldo_total=0
+        )
+        db.session.add(admin_user)
+        db.session.commit()
+
+    if Product.query.count() == 0:
+        produtos_iniciais = [
+            Product(nome="Vale Compras R$ 50", descricao="Use no próximo pedido.", valor_pontos=2000, 
+                    imagem_url="https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?w=400", categoria="Vale"),
+            Product(nome="Kit Pintura Premium", descricao="Profissional completo.", valor_pontos=3500, 
+                    imagem_url="https://images.unsplash.com/photo-1631209121750-a9f656d8f7e6?w=400", categoria="Ferramenta"),
+        ]
+        db.session.add_all(produtos_iniciais)
+        db.session.commit()
+
 
 @app.route("/resgatar/<int:produto_id>", methods=["POST"])
 @login_required
 def resgatar_produto(produto_id):
-    prod = Product.query.get_or_404(produto_id)
-    if current_user.saldo_total < prod.valor_pontos:
-        flash("Saldo insuficiente.", "error")
-        return redirect(url_for("catalogo"))
+    if current_user.role != 'pintor':
+        return redirect(url_for("index"))
     
-    transacao = Transaction(user_id=current_user.id, pontos=-prod.valor_pontos, 
-                            descricao=f"Resgate: {prod.nome}", status='pendente')
-    current_user.saldo_total -= prod.valor_pontos
+    produto = Product.query.get_or_404(produto_id)
+    
+    if current_user.saldo_total < produto.valor_pontos:
+        flash("Saldo insuficiente para este resgate.", "error")
+        return redirect(url_for("catalogo"))
+
+    # Criar transação pendente (negativa)
+    transacao = Transaction(
+        user_id=current_user.id,
+        pontos=-produto.valor_pontos,
+        descricao=f"Resgate: {produto.nome}",
+        status='pendente'
+    )
+    # Deduzir do saldo imediatamente para "reservar" os pontos
+    current_user.saldo_total -= produto.valor_pontos
+    
     db.session.add(transacao)
     db.session.commit()
-    flash("Solicitação enviada!", "success")
+    
+    flash("Solicitação de resgate enviada! Aguarde a aprovação da loja.", "success")
     return redirect(url_for("extrato"))
 
 @app.route("/admin/aprovar_resgate/<int:id>/<string:acao>", methods=["POST"])
 @login_required
 def admin_aprovar_resgate(id, acao):
+    if current_user.role != 'admin':
+        return redirect(url_for("index"))
+    
     t = Transaction.query.get_or_404(id)
-    u = User.query.get(t.user_id)
+    user = User.query.get(t.user_id)
+
     if acao == "confirmar":
         t.status = 'concluido'
-        flash("Resgate confirmado!", "success")
+        flash(f"Resgate de {user.nome} confirmado!", "success")
     elif acao == "reprovar":
-        u.saldo_total += abs(t.pontos)
+        # Devolve os pontos ao usuário
+        user.saldo_total += abs(t.pontos)
         t.status = 'reprovado'
-        flash("Resgate reprovado e pontos devolvidos.", "warning")
+        flash(f"Resgate de {user.nome} reprovado. Pontos devolvidos.", "warning")
+    
     db.session.commit()
     return redirect(url_for("admin_usuarios"))
 
-@app.route("/admin/confirmar_entrega/<int:id>", methods=["POST"])
-@login_required
-def admin_confirmar_entrega(id):
-    t = Transaction.query.get_or_404(id)
-    t.status = 'entregue'
-    db.session.commit()
-    flash("Entrega registrada!", "success")
-    return redirect(url_for("admin_usuarios"))
-
-# --- Rotas Gerais ---
-
-@app.route("/")
-def index():
-    if current_user.is_authenticated:
-        if current_user.role == 'admin': return redirect(url_for("admin_usuarios"))
-        transacoes = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.data.desc()).limit(10).all()
-        return render_template("index.html", user=current_user, transacoes=transacoes)
-    return redirect(url_for("catalogo"))
-
-@app.route("/catalogo")
-def catalogo():
-    produtos = Product.query.order_by(Product.valor_pontos.asc()).all()
-    categorias = [c[0] for c in db.session.query(Product.categoria).distinct().all()]
-    return render_template("catalogo.html", produtos=produtos, categorias=categorias)
-
-@app.route("/extrato")
-@login_required
-def extrato():
-    transacoes = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.data.desc()).all()
-    return render_template("extrato.html", user=current_user, transacoes=transacoes)
 
 with app.app_context():
     db.create_all()

@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Regulamento - Novo Mundo das Tintas{% endblock %}
+
+{% block content %}
+<div class="flex justify-center items-center min-h-screen bg-gradient-to-tr from-slate-100 via-slate-50 to-blue-100 p-4 md:p-10">
+  <div class="card w-full max-w-4xl bg-base-100 shadow-2xl border border-white overflow-hidden rounded-3xl transition-all">
+    
+    <div class="bg-[#00295d] p-10 text-center relative">
+      <div class="absolute top-0 right-0 p-4 opacity-5">
+          <i class="fa-solid fa-file-contract text-8xl text-white"></i>
+      </div>
+      <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-md mb-4 border border-white/20">
+        <i class="fa-solid fa-gavel text-4xl text-white"></i>
+      </div>
+      <h2 class="text-3xl font-black text-white tracking-tight uppercase">Regulamento</h2>
+      <p class="text-blue-200/80 text-sm mt-2 font-medium">Programa Pintor Parceiro – Novo Mundo das Tintas</p>
+    </div>
+
+    <div class="card-body p-8 md:p-12 bg-white text-slate-600 leading-relaxed overflow-y-auto max-h-[70vh] custom-scrollbar">
+      
+      <section class="mb-8">
+        <h3 class="text-[#00295d] font-black text-lg mb-2 uppercase tracking-wide">Introdução</h3>
+        <p>O Programa Pintor Parceiro tem como objetivo valorizar e reconhecer os pintores profissionais, oferecendo benefícios mediante critérios e procedimentos definidos pela Novo Mundo das Tintas. Os participantes do Programa serão identificados exclusivamente pelo número de celular válido cadastrado, sendo este o principal meio de identificação, comunicação e controle de pontuação.</p>
+      </section>
+
+      <section class="mb-8">
+        <h3 class="text-[#00295d] font-black text-lg mb-2 uppercase tracking-wide">1. Adesão ao Programa</h3>
+        <ul class="space-y-2 list-disc pl-5">
+          <li>Exclusivo para pintores maiores de 18 anos residentes em território nacional.</li>
+          <li>Adesão via preenchimento de formulário de cadastro, sem necessidade de contrato formal.</li>
+          <li>A veracidade das informações, especialmente o celular, é responsabilidade do participante.</li>
+          <li>O cadastro será validado em até 7 (sete) dias após o recebimento.</li>
+        </ul>
+      </section>
+
+      <section class="mb-8">
+        <h3 class="text-[#00295d] font-black text-lg mb-2 uppercase tracking-wide">2. Pontuação</h3>
+        <ul class="space-y-2 list-disc pl-5">
+          <li>Pontos acumulados ao indicar clientes que realizarem compras nas lojas Novo Mundo das Tintas.</li>
+          <li>Os pontos serão disponibilizados em até 96 horas após a confirmação da compra.</li>
+          <li>O programa é pessoal e intransferível; pontos não podem ser convertidos em dinheiro.</li>
+          <li>Divergências devem ser manifestadas em até 10 dias úteis com comprovantes.</li>
+        </ul>
+      </section>
+
+      <section class="mb-8">
+        <h3 class="text-[#00295d] font-black text-lg mb-2 uppercase tracking-wide">3. Resgate de Pontos</h3>
+        <p>Para resgatar, o participante deve atingir a pontuação mínima exigida e informar o celular cadastrado. Os pontos utilizados serão automaticamente debitados. Prêmios indisponíveis podem ser substituídos por equivalentes.</p>
+      </section>
+
+      <section class="mb-8">
+        <h3 class="text-[#00295d] font-black text-lg mb-2 uppercase tracking-wide">4. Validade e Cancelamento</h3>
+        <p>Os pontos têm validade de 24 meses. A empresa pode cancelar a participação ou pontos em casos de fraude, erro ou uso indevido.</p>
+      </section>
+
+      <div class="divider"></div>
+
+      <div class="text-center mt-6">
+        <a href="{{ url_for('register') }}" class="btn bg-[#00295d] border-none text-white px-10 rounded-2xl hover:bg-blue-900 transition-all">
+            Voltar para Cadastro
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: #00295d33; border-radius: 10px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #00295d; }
+</style>
+{% endblock %}

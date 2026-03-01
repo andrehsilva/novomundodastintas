@@ -364,6 +364,11 @@ def extrato():
     transacoes = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.data.desc()).all()
     return render_template("extrato.html", user=current_user, transacoes=transacoes)
 
+
+@app.route("/regulamento")
+def regulamento():
+    return render_template("regulamento.html")
+
 # --- Funções Internas e Inicialização ---
 
 def registrar_transacao(user: User, pontos: int, descricao: str) -> None:

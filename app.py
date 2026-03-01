@@ -2,6 +2,8 @@ import csv
 import os
 from datetime import datetime
 from io import StringIO
+import re
+from werkzeug.security import check_password_hash
 
 from flask import Flask, flash, redirect, render_template, request, url_for
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
@@ -42,28 +44,47 @@ def allowed_file(filename):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# --- Rotas de Autenticação ---
 
-# ... (imports e configurações iniciais permanecem os mesmos)
+
+
+
 
 # --- Rota de Login por Telefone ---
+# --- Rota de Login (Telefone ou Email) ---
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    def only_digits(s: str | None) -> str:
+        if not s:
+            return ""
+        return re.sub(r"\D+", "", s)
+
     if request.method == "POST":
-        identificador = request.form.get("telefone")
-        senha = request.form.get("senha")
-        user = User.query.filter_by(telefone=identificador).first() or \
-               User.query.filter_by(email=identificador).first()
-        
-        if user and user.senha_hash == senha:
-            if not user.ativo and user.role != 'admin':
+        identificador = (request.form.get("telefone") or "").strip()
+        senha = request.form.get("senha") or ""
+
+        telefone = only_digits(identificador)
+
+        # Busca por telefone normalizado (somente dígitos) ou por email
+        user = None
+        if telefone:
+            user = User.query.filter_by(telefone=telefone).first()
+        if not user:
+            user = User.query.filter_by(email=identificador.lower()).first()
+
+        # Valida senha (hash)
+        if user and user.senha_hash and check_password_hash(user.senha_hash, senha):
+            if (not user.ativo) and (user.role != "admin"):
                 flash("Aguarde a ativação da sua conta.", "warning")
                 return redirect(url_for("login"))
+
             login_user(user)
             return redirect(url_for("index"))
+
         flash("Credenciais inválidas.", "error")
+
     return render_template("login.html")
 
+    
 # --- Cadastro de Novo Profissional (Admin) ---
 @app.route("/admin/usuarios/novo", methods=["POST"])
 @login_required

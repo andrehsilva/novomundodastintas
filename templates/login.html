@@ -1,23 +1,25 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="flex justify-center items-center min-h-[85vh] bg-gradient-to-br from-base-200 to-base-300 p-4">
-  <div class="card w-full max-w-md bg-base-100 shadow-2xl border border-base-300 overflow-hidden">
+<div class="flex justify-center items-center min-h-[85vh] bg-gradient-to-tr from-slate-100 via-slate-50 to-blue-50 p-4">
+  <div class="card w-full max-w-md bg-base-100 shadow-2xl border border-white overflow-hidden rounded-3xl">
     
-    <div class="bg-[#00295d] p-8 text-center">
-      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 mb-4">
-        <i class="fa-solid fa-user-lock text-3xl text-white"></i>
+    <div class="bg-[#00295d] p-10 text-center relative">
+      <div class="absolute top-0 right-0 p-4 opacity-10">
+          <i class="fa-solid fa-paint-roller text-6xl text-white"></i>
       </div>
-      <h2 class="text-2xl font-bold text-white">Bem-vindo de volta!</h2>
-      <p class="text-blue-100/70 text-sm mt-1">Acesse sua conta para gerenciar seus pontos.</p>
+      <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-md mb-4 border border-white/20">
+        <i class="fa-solid fa-user-check text-4xl text-white"></i>
+      </div>
+      <h2 class="text-3xl font-extrabold text-white tracking-tight">PinturaFiel</h2>
+      <p class="text-blue-200/80 text-sm mt-2 font-medium">Acesse seu painel de pontos e prêmios</p>
     </div>
 
-    <div class="card-body p-8">
+    <div class="card-body p-10 bg-white">
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
           {% for category, message in messages %}
-            <div class="alert {% if category == 'error' %}alert-error{% else %}alert-info{% endif %} mb-4 shadow-sm">
-              <i class="fa-solid fa-circle-exclamation"></i>
+            <div class="alert {% if category == 'error' %}alert-error{% else %}alert-info{% endif %} mb-6 rounded-xl animate-bounce">
               <span>{{ message }}</span>
             </div>
           {% endfor %}
@@ -27,10 +29,10 @@
       <form method="post" id="loginForm" class="space-y-6">
         <div class="form-control">
           <label class="label pt-0">
-            <span class="label-text font-bold text-gray-600">Telefone Celular</span>
+            <span class="label-text font-bold text-slate-700">Telefone Celular</span>
           </label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
+          <div class="relative group">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 group-focus-within:text-[#00295d] transition-colors">
               <i class="fa-solid fa-phone"></i>
             </span>
             <input
@@ -38,47 +40,47 @@
               name="telefone"
               id="login_telefone"
               placeholder="(00) 00000-0000"
-              class="input input-bordered w-full pl-12 bg-gray-50 focus:bg-white transition-all text-lg"
+              class="input input-bordered w-full pl-12 bg-slate-50 border-slate-200 focus:border-[#00295d] focus:ring-2 focus:ring-[#00295d]/10 transition-all text-lg font-medium"
               required
             />
           </div>
-          <label class="label">
-            <span id="tel_helper" class="label-text-alt text-gray-400">Digite seu DDD + número</span>
-            <span id="char_counter" class="label-text-alt font-mono">0/11</span>
-          </label>
+          <div class="flex justify-between mt-2">
+            <span id="tel_helper" class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">DDD + NÚMERO</span>
+            <span id="char_counter" class="text-[10px] font-black text-slate-300">0/11</span>
+          </div>
         </div>
 
         <div class="form-control">
           <label class="label pt-0">
-            <span class="label-text font-bold text-gray-600">Sua Senha</span>
+            <span class="label-text font-bold text-slate-700">Sua Senha</span>
           </label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-              <i class="fa-solid fa-key"></i>
+          <div class="relative group">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 group-focus-within:text-[#00295d] transition-colors">
+              <i class="fa-solid fa-lock"></i>
             </span>
             <input
               type="password"
               name="senha"
-              class="input input-bordered w-full pl-12 bg-gray-50 focus:bg-white transition-all text-lg"
+              class="input input-bordered w-full pl-12 bg-slate-50 border-slate-200 focus:border-[#00295d] focus:ring-2 focus:ring-[#00295d]/10 transition-all text-lg"
               required
             />
           </div>
           <div class="flex justify-end mt-2">
-            <a href="{{ url_for('esqueci_senha') }}" class="text-sm link link-primary no-underline hover:underline font-medium">
-              Esqueci a senha?
+            <a href="{{ url_for('esqueci_senha') }}" class="text-xs text-[#00295d] hover:text-blue-800 font-bold transition-colors">
+              Esqueceu a senha?
             </a>
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary w-full text-lg font-bold shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all">
-            Entrar no Painel
+        <button type="submit" class="btn bg-[#00295d] hover:bg-blue-900 border-none w-full text-white text-lg font-black shadow-xl shadow-blue-900/20 py-4 h-auto rounded-xl transition-all hover:-translate-y-1">
+            ENTRAR NO CLUBE
         </button>
       </form>
 
-      <div class="divider my-8 text-gray-400 text-xs">AINDA NÃO TEM CONTA?</div>
+      <div class="divider my-10 text-slate-300 text-[10px] font-bold tracking-widest">OU CADASTRE-SE</div>
       
-      <a href="{{ url_for('register') }}" class="btn btn-outline btn-primary w-full border-2 hover:bg-primary/5">
-        Solicitar Cadastro de Pintor
+      <a href="{{ url_for('register') }}" class="btn btn-ghost btn-block text-slate-500 hover:text-[#00295d] font-bold">
+        Sou novo por aqui
       </a>
     </div>
   </div>
@@ -90,36 +92,26 @@
     const $tel = $('#login_telefone');
     const $counter = $('#char_counter');
 
-    // Máscara fixa para 11 dígitos (Celular com 9)
     $tel.mask('(00) 00000-0000', {
       onKeyPress: function(val, e, field, options) {
-        // Atualiza o contador visual de dígitos
         const digits = val.replace(/\D/g, "").length;
         $counter.text(digits + '/11');
         
         if(digits === 11) {
-            $counter.addClass('text-success font-bold').removeClass('text-gray-400');
+            $counter.addClass('text-emerald-500').removeClass('text-slate-300');
         } else {
-            $counter.removeClass('text-success font-bold').addClass('text-gray-400');
+            $counter.removeClass('text-emerald-500').addClass('text-slate-300');
         }
       }
     });
 
-    // Validação de travamento no submit
     $('#loginForm').on('submit', function (e) {
       const digits = $tel.val().replace(/\D/g, "");
-      
       if (digits.length < 11) {
         e.preventDefault();
-        $tel.addClass('input-error');
-        alert("Por favor, insira o número completo com DDD (11 dígitos).");
+        alert("Atenção: Insira os 11 dígitos do seu telefone (DDD + Número).");
         $tel.focus();
       }
-    });
-
-    // Remove erro ao digitar
-    $tel.on('input', function() {
-        $(this).removeClass('input-error');
     });
   });
 </script>

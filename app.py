@@ -310,19 +310,43 @@ def admin_confirmar_entrega(id):
 # --- Rotas Principais ---
 
 @app.route("/")
+@login_required
 def index():
-    if current_user.is_authenticated:
-        if current_user.role == 'admin':
-            return redirect(url_for("admin_usuarios"))
-        transacoes = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.data.desc()).limit(10).all()
-        return render_template("index.html", user=current_user, transacoes=transacoes)
-    return redirect(url_for("catalogo"))
+    if current_user.role == 'admin':
+        return redirect(url_for("admin_usuarios"))
+    
+    # Lógica de Ranking: Conta quantos usuários ativos têm saldo estritamente maior
+    posicao_superior = User.query.filter(
+        User.role == 'pintor',
+        User.ativo == True,
+        User.saldo_total > current_user.saldo_total
+    ).count()
+
+    transacoes = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.data.desc()).limit(10).all()
+    
+    return render_template("index.html", 
+                           user=current_user, 
+                           transacoes=transacoes, 
+                           competidores_acima=posicao_superior)
 
 @app.route("/catalogo")
 def catalogo():
-    produtos = Product.query.order_by(Product.valor_pontos.asc()).all()
-    categorias = [c[0] for c in db.session.query(Product.categoria).distinct().all()]
-    return render_template("catalogo.html", produtos=produtos, categorias=categorias)
+    # Captura a categoria da URL (ex: /catalogo?categoria=Tintas)
+    categoria_selecionada = request.args.get('categoria')
+    
+    query = Product.query
+    if categoria_selecionada:
+        query = query.filter_by(categoria=categoria_selecionada)
+    
+    produtos = query.order_by(Product.valor_pontos.asc()).all()
+    
+    # Busca categorias únicas para o filtro
+    categorias = [c[0] for c in db.session.query(Product.categoria).distinct().all() if c[0]]
+    
+    return render_template("catalogo.html", 
+                           produtos=produtos, 
+                           categorias=categorias, 
+                           categoria_ativa=categoria_selecionada)
 
 @app.route("/extrato")
 @login_required

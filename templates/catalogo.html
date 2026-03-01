@@ -27,7 +27,7 @@
                 <select name="categoria" class="select select-bordered select-sm">
                     <option value="">Todas as categorias</option>
                     {% for cat in categorias %}
-                        <option value="{{ cat }}" {{ 'selected' if categoria_atual == cat }}>{{ cat }}</option>
+                        <option value="{{ cat }}" {{ 'selected' if categoria_ativa == cat }}>{{ cat }}</option>
                     {% endfor %}
                 </select>
             </div>

@@ -1,63 +1,132 @@
 {% extends 'base.html' %}
-{% block title %}Novo Mundo das Tintas{% endblock %}
+{% block title %}Painel do Pintor - PinturaFiel{% endblock %}
+
 {% block content %}
 
 {% set aviso_retirada = transacoes | selectattr('status', 'equalto', 'concluido') | list %}
 {% if aviso_retirada %}
-<div class="alert alert-success shadow-lg mb-6">
-  <i class="fa-solid fa-gift"></i>
-  <span>Você tem prêmios prontos para retirada! Vá até a loja Mundo das Tintas.</span>
+<div class="alert alert-success shadow-lg mb-8 rounded-2xl border-none bg-emerald-500 text-white animate-bounce">
+  <i class="fa-solid fa-gift text-2xl"></i>
+  <span class="font-bold">Parabéns! Você tem prêmios prontos para retirada na loja Mundo das Tintas.</span>
 </div>
 {% endif %}
-  <section class="grid gap-4 md:grid-cols-3">
-    <div class="card bg-primary text-primary-content shadow-xl md:col-span-2">
-      <div class="card-body">
-        <p class="opacity-90">Saldo disponível</p>
-        {% if user %}
-          <h1 class="card-title text-4xl">{{ user.saldo_total }} pontos</h1>
-          <p>{{ user.nome }} • {{ user.email }}</p>
-        {% else %}
-          <h1 class="card-title text-2xl">Sem cliente cadastrado</h1>
-        {% endif %}
+
+<div class="max-w-6xl mx-auto space-y-8 pb-10">
+  
+  <section class="grid gap-6 md:grid-cols-3">
+    
+    <div class="card bg-[#00295d] text-white shadow-2xl md:col-span-2 overflow-hidden relative border border-white/10 rounded-3xl">
+      <div class="card-body p-10">
+        <div class="flex justify-between items-start relative z-10">
+            <div>
+                <p class="text-blue-200/70 text-xs font-black uppercase tracking-[0.2em]">Saldo Disponível</p>
+                <h1 class="text-6xl font-black mt-2 flex items-baseline gap-2">
+                    {{ user.saldo_total }} 
+                    <span class="text-xl font-medium opacity-50 uppercase">pts</span>
+                </h1>
+            </div>
+            <div class="bg-white/10 p-4 rounded-2xl backdrop-blur-md">
+                <i class="fa-solid fa-wallet text-3xl text-blue-200"></i>
+            </div>
+        </div>
+        
+        <div class="mt-8 flex items-center gap-3 bg-white/10 w-fit px-5 py-2.5 rounded-full backdrop-blur-xl border border-white/20">
+            <div class="flex -space-x-2">
+                <div class="w-6 h-6 rounded-full bg-yellow-400 flex items-center justify-center text-[10px] text-[#00295d]">
+                    <i class="fa-solid fa-crown"></i>
+                </div>
+            </div>
+            <span class="text-xs font-bold tracking-tight">
+                {% if competidores_acima == 0 %}
+                    VOCÊ É O <span class="text-yellow-400">#1 DO RANKING</span>! EXCELENTE TRABALHO!
+                {% else %}
+                    EXISTEM <span class="text-yellow-400">{{ competidores_acima }}</span> PINTORES COM MAIS PONTOS QUE VOCÊ.
+                {% endif %}
+            </span>
+        </div>
+
+        <i class="fa-solid fa-trophy text-[12rem] opacity-5 absolute -right-8 -bottom-10 rotate-12"></i>
+        
+        <div class="mt-10 pt-6 border-t border-white/10 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-blue-400/20 flex items-center justify-center font-bold text-blue-200">
+                {{ user.nome[0] | upper }}
+            </div>
+            <div>
+                <p class="text-sm font-bold">{{ user.nome }}</p>
+                <p class="text-[10px] opacity-50 uppercase tracking-widest">Profissional Parceiro</p>
+            </div>
+        </div>
       </div>
     </div>
 
-    <div class="card bg-base-100 shadow-xl">
-      <div class="card-body">
-        <h2 class="card-title">Ações rápidas</h2>
-        <a href="{{ url_for('catalogo') }}" class="btn btn-outline btn-primary">Ver catálogo</a>
-        <a href="{{ url_for('admin_usuarios') }}" class="btn btn-outline">Creditar pontos</a>
+    <div class="card bg-white shadow-xl border border-slate-100 rounded-3xl overflow-hidden">
+      <div class="bg-slate-50 p-6 border-b border-slate-100">
+        <h2 class="font-black text-[#00295d] uppercase tracking-widest text-xs">Menu Rápido</h2>
+      </div>
+      <div class="card-body p-6 space-y-4">
+        <a href="{{ url_for('catalogo') }}" class="btn bg-[#00295d] hover:bg-blue-900 border-none text-white w-full h-16 rounded-2xl shadow-lg shadow-blue-900/20 group">
+          <i class="fa-solid fa-store mr-2 group-hover:scale-110 transition-transform"></i>
+          Ver Catálogo
+        </a>
+        <a href="{{ url_for('extrato') }}" class="btn btn-outline border-slate-200 hover:bg-slate-50 hover:text-[#00295d] text-slate-500 w-full h-16 rounded-2xl">
+          <i class="fa-solid fa-list-ul mr-2"></i>
+          Extrato Completo
+        </a>
+        
+        <div class="pt-4 mt-4 border-t border-dashed border-slate-200 text-center">
+            <p class="text-[10px] text-slate-400 font-bold uppercase">Suporte ao Pintor</p>
+            <p class="text-xs text-slate-500 mt-1 italic font-medium">Dúvidas? Procure o gerente da loja.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="mt-6 card bg-base-100 shadow-xl">
-    <div class="card-body">
-      <h2 class="card-title">Últimas movimentações</h2>
-      <div class="overflow-x-auto">
-        <table class="table">
-          <thead><tr><th>Data</th><th>Descrição</th><th>Status</th><th>Pontos</th></tr></thead>
-          <tbody>
-            {% for item in transacoes %}
-              <tr>
-                <td>{{ item.data.strftime('%d/%m/%Y %H:%M') }}</td>
-                <td>{{ item.descricao }}</td>
-                <td>
-                  <span class="badge badge-sm 
-                    {{ 'badge-warning' if item.status == 'pendente' }}
-                    {{ 'badge-success' if item.status == 'concluido' or item.status == 'aprovado' }}
-                    {{ 'badge-error' if item.status == 'reprovado' }}">
-                    {{ item.status | upper }}
-                  </span>
-                </td>
-                <td class="font-semibold {{ 'text-success' if item.pontos > 0 else 'text-error' }}">
-                  {{ item.pontos }}
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+  <section class="card bg-white shadow-xl border border-slate-100 rounded-3xl overflow-hidden">
+    <div class="p-8 border-b border-slate-50 flex justify-between items-center bg-white">
+      <div>
+        <h2 class="text-xl font-black text-[#00295d]">Últimas Movimentações</h2>
+        <p class="text-xs text-slate-400 font-medium">Acompanhe seus créditos e resgates recentes</p>
       </div>
+      <i class="fa-solid fa-clock-rotate-left text-2xl text-slate-200"></i>
+    </div>
+    
+    <div class="overflow-x-auto">
+      <table class="table table-zebra w-full">
+        <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] tracking-widest font-black">
+          <tr>
+            <th class="py-4 pl-8">Data</th>
+            <th>Descrição</th>
+            <th class="text-center">Status</th>
+            <th class="text-right pr-8">Pontos</th>
+          </tr>
+        </thead>
+        <tbody class="text-slate-600">
+          {% for item in transacoes %}
+            <tr class="hover:bg-blue-50/50 transition-colors border-b border-slate-50 last:border-none">
+              <td class="py-5 pl-8 font-medium">{{ item.data.strftime('%d/%m/%Y') }}</td>
+              <td class="font-bold text-[#00295d]">{{ item.descricao }}</td>
+              <td class="text-center">
+                <span class="badge badge-md border-none px-4 py-3 font-bold text-[10px] tracking-wider
+                  {{ 'bg-amber-100 text-amber-700' if item.status == 'pendente' }}
+                  {{ 'bg-emerald-100 text-emerald-700' if item.status == 'concluido' or item.status == 'aprovado' }}
+                  {{ 'bg-rose-100 text-rose-700' if item.status == 'reprovado' }}
+                  {{ 'bg-blue-100 text-blue-700' if item.status == 'entregue' }}">
+                  {{ item.status | upper }}
+                </span>
+              </td>
+              <td class="text-right pr-8 font-black text-lg {{ 'text-emerald-500' if item.pontos > 0 else 'text-rose-500' }}">
+                {{ '+' if item.pontos > 0 }}{{ item.pontos }}
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+                <td colspan="4" class="text-center py-10 text-slate-400 italic">Nenhuma movimentação encontrada.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
   </section>
+</div>
+
 {% endblock %}

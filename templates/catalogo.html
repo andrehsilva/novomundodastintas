@@ -2,103 +2,114 @@
 {% block title %}Catálogo de Prêmios - Novo Mundo das Tintas{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto pb-10">
+<div class="max-w-6xl mx-auto pb-10 space-y-10">
     
-    <div class="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
-        <div>
-            <h1 class="text-3xl font-bold text-[#00295d]">Catálogo de Prêmios</h1>
-            <p class="opacity-70">Troque seus pontos acumulados pelos melhores prêmios e vantagens.</p>
-        </div>
-        
-        {% if current_user.is_authenticated and current_user.role == 'pintor' %}
-        <div class="stats shadow bg-primary text-primary-content">
-            <div class="stat py-2 px-4">
-                <div class="stat-title text-primary-content/70">Seu Saldo Atual</div>
-                <div class="stat-value text-2xl">{{ current_user.saldo_total }} <span class="text-sm font-normal">pts</span></div>
+    <div class="card bg-[#00295d] text-white shadow-2xl overflow-hidden relative border border-white/10 rounded-3xl p-8 md:p-12">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
+            <div class="text-center md:text-left">
+                <p class="text-blue-200/70 text-xs font-black uppercase tracking-[0.2em] mb-2">Resgate de Vantagens</p>
+                <h1 class="text-4xl md:text-5xl font-black tracking-tight">Catálogo de Prêmios</h1>
+                <p class="text-blue-100/60 mt-3 max-w-md font-medium">Troque seus pontos acumulados pelas melhores ferramentas e prêmios do Novo Mundo das Tintas.</p>
             </div>
+            
+            {% if current_user.is_authenticated and current_user.role == 'pintor' %}
+            <div class="bg-white/10 p-6 rounded-3xl backdrop-blur-xl border border-white/20 text-center min-w-[200px]">
+                <p class="text-[10px] font-black uppercase tracking-widest opacity-60">Seu Saldo</p>
+                <div class="text-4xl font-black mt-1">{{ current_user.saldo_total }} <span class="text-sm font-normal opacity-50">pts</span></div>
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
+        <i class="fa-solid fa-gift text-[12rem] opacity-5 absolute -right-10 -bottom-10 rotate-12"></i>
     </div>
 
-    <div class="bg-base-100 p-4 rounded-xl shadow-sm border border-base-300 mb-8">
-        <form method="get" action="{{ url_for('catalogo') }}" class="flex flex-wrap gap-4 items-end">
-            <div class="form-control w-full max-w-xs">
-                <label class="label"><span class="label-text font-bold">Categoria</span></label>
-                <select name="categoria" class="select select-bordered select-sm">
-                    <option value="">Todas as categorias</option>
-                    {% for cat in categorias %}
-                        <option value="{{ cat }}" {{ 'selected' if categoria_ativa == cat }}>{{ cat }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+    <div class="card bg-white shadow-xl border border-slate-100 rounded-3xl overflow-hidden">
+        <div class="bg-slate-50 px-8 py-4 border-b border-slate-100 flex items-center gap-2">
+            <i class="fa-solid fa-sliders text-[#00295d]"></i>
+            <h2 class="font-black text-[#00295d] uppercase tracking-widest text-[10px]">Filtrar por Preferência</h2>
+        </div>
+        <div class="p-6">
+            <form method="get" action="{{ url_for('catalogo') }}" class="flex flex-wrap gap-6 items-end">
+                <div class="form-control flex-1 min-w-[200px]">
+                    <label class="label"><span class="label-text font-bold text-slate-500 text-xs uppercase">Categoria</span></label>
+                    <select name="categoria" class="select select-bordered bg-slate-50 border-slate-200 focus:border-[#00295d] rounded-xl">
+                        <option value="">Todas as categorias</option>
+                        {% for cat in categorias %}
+                            <option value="{{ cat }}" {{ 'selected' if categoria_ativa == cat }}>{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-            <div class="form-control w-full max-w-xs">
-                <label class="label"><span class="label-text font-bold">Ordenar por Preço</span></label>
-                <select name="ordem" class="select select-bordered select-sm">
-                    <option value="asc" {{ 'selected' if ordem_atual == 'asc' }}>Menor para Maior</option>
-                    <option value="desc" {{ 'selected' if ordem_atual == 'desc' }}>Maior para Menor</option>
-                </select>
-            </div>
+                <div class="form-control flex-1 min-w-[200px]">
+                    <label class="label"><span class="label-text font-bold text-slate-500 text-xs uppercase">Ordem de Preço</span></label>
+                    <select name="ordem" class="select select-bordered bg-slate-50 border-slate-200 focus:border-[#00295d] rounded-xl">
+                        <option value="asc" {{ 'selected' if ordem_atual == 'asc' }}>Crescente (Menor para Maior)</option>
+                        <option value="desc" {{ 'selected' if ordem_atual == 'desc' }}>Decrescente (Maior para Menor)</option>
+                    </select>
+                </div>
 
-            <div class="flex gap-2">
-                <button type="submit" class="btn btn-primary btn-sm text-white">Filtrar</button>
-                <a href="{{ url_for('catalogo') }}" class="btn btn-ghost btn-sm">Limpar</a>
-            </div>
-        </form>
+                <div class="flex gap-2">
+                    <button type="submit" class="btn bg-[#00295d] hover:bg-blue-900 border-none text-white px-8 rounded-xl shadow-lg shadow-blue-900/20">
+                        Aplicar
+                    </button>
+                    <a href="{{ url_for('catalogo') }}" class="btn btn-ghost text-slate-400 hover:bg-slate-100 rounded-xl">
+                        Limpar
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <section class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <section class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {% for produto in produtos %}
-            <article class="card bg-base-100 shadow-xl border border-base-300 hover:shadow-2xl transition-all duration-300 group">
-                <figure class="relative overflow-hidden h-56">
-                    {# Suporte para imagens externas e uploads locais #}
+            <article class="card bg-white shadow-xl border border-slate-100 rounded-[2.5rem] overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group">
+                <figure class="relative h-64 overflow-hidden">
                     {% if 'http' in produto.imagem_url %}
-                        <img src="{{ produto.imagem_url }}" alt="{{ produto.nome }}" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <img src="{{ produto.imagem_url }}" alt="{{ produto.nome }}" class="h-full w-full object-cover group-hover:scale-110 transition-transform duration-700" />
                     {% else %}
-                        <img src="{{ url_for('static', filename=produto.imagem_url) }}" alt="{{ produto.nome }}" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <img src="{{ url_for('static', filename=produto.imagem_url) }}" alt="{{ produto.nome }}" class="h-full w-full object-cover group-hover:scale-110 transition-transform duration-700" />
                     {% endif %}
                     
-                    <div class="absolute top-2 right-2">
-                        <span class="badge badge-primary shadow-md">{{ produto.categoria }}</span>
+                    <div class="absolute top-4 left-4">
+                        <span class="badge bg-[#00295d]/80 backdrop-blur-md border-none text-white py-3 px-4 font-bold text-[10px] tracking-widest uppercase">{{ produto.categoria }}</span>
                     </div>
                 </figure>
 
-                <div class="card-body p-5">
-                    <div class="flex justify-between items-start">
-                        <h2 class="card-title text-[#00295d]">{{ produto.nome }}</h2>
-                        <div class="text-right">
-                            <span class="block font-bold text-xl text-primary">{{ produto.valor_pontos }}</span>
-                            <span class="text-[10px] uppercase opacity-50 font-bold">pontos</span>
+                <div class="card-body p-8">
+                    <div class="flex justify-between items-start gap-2">
+                        <h2 class="text-xl font-black text-[#00295d] leading-tight">{{ produto.nome }}</h2>
+                        <div class="text-right shrink-0">
+                            <span class="block font-black text-2xl text-[#00295d]">{{ produto.valor_pontos }}</span>
+                            <span class="text-[10px] uppercase opacity-40 font-black tracking-tighter">pontos</span>
                         </div>
                     </div>
                     
-                    <p class="text-sm opacity-70 line-clamp-2 mt-2">{{ produto.descricao }}</p>
+                    <p class="text-sm text-slate-500 line-clamp-2 mt-3 font-medium">{{ produto.descricao }}</p>
 
-                    <div class="card-actions mt-6">
+                    <div class="card-actions mt-8">
                         {% if not current_user.is_authenticated %}
-                            <a href="{{ url_for('login') }}" class="btn btn-outline btn-primary btn-block">
-                                <i class="fa-solid fa-right-to-bracket"></i> Entrar para Resgatar
+                            <a href="{{ url_for('login') }}" class="btn btn-outline border-slate-200 hover:bg-[#00295d] hover:border-[#00295d] btn-block rounded-2xl font-bold">
+                                Entrar para Resgatar
                             </a>
                         {% elif current_user.role == 'admin' %}
-                            <div class="badge badge-ghost w-full py-4 gap-2">
-                                <i class="fa-solid fa-eye"></i> Visualização de Admin
+                            <div class="bg-slate-100 text-slate-400 w-full py-3 rounded-2xl text-center text-xs font-bold uppercase tracking-widest">
+                                Modo Visualização
                             </div>
                         {% else %}
                             {% if current_user.saldo_total >= produto.valor_pontos %}
-                                {# Acionamento do Modal Customizado #}
                                 <button type="button" 
-                                        class="btn btn-primary btn-block text-white shadow-lg group-hover:scale-[1.02]"
+                                        class="btn bg-[#00295d] hover:bg-blue-900 border-none text-white btn-block h-14 rounded-2xl shadow-lg shadow-blue-900/20 font-black text-lg group"
                                         onclick="abrirConfirmacao('{{ produto.id }}', '{{ produto.nome }}')">
-                                    <i class="fa-solid fa-cart-shopping"></i> Resgatar Agora
+                                    RESGATAR AGORA
+                                    <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
                                 </button>
                             {% else %}
-                                <div class="w-full">
-                                    <button class="btn btn-block btn-disabled mb-2">Pontos Insuficientes</button>
-                                    <div class="w-full bg-base-200 rounded-full h-1.5 mt-2">
+                                <div class="w-full space-y-3">
+                                    <button class="btn btn-block btn-disabled bg-slate-100 text-slate-300 rounded-2xl h-14 font-black">PONTOS INSUFICIENTES</button>
+                                    <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                                         {% set progresso = (current_user.saldo_total / produto.valor_pontos * 100) | round | int %}
-                                        <div class="bg-primary h-1.5 rounded-full" style="width: {{ progresso if progresso <= 100 else 100 }}%"></div>
+                                        <div class="bg-[#00295d] h-2 rounded-full transition-all duration-1000" style="width: {{ progresso if progresso <= 100 else 100 }}%"></div>
                                     </div>
-                                    <p class="text-[10px] text-center mt-1 opacity-60 italic">Faltam {{ produto.valor_pontos - current_user.saldo_total }} pontos para este prêmio</p>
+                                    <p class="text-[10px] text-center font-bold text-slate-400 uppercase tracking-tighter">Faltam {{ produto.valor_pontos - current_user.saldo_total }} pontos para o resgate</p>
                                 </div>
                             {% endif %}
                         {% endif %}
@@ -106,45 +117,47 @@
                 </div>
             </article>
         {% else %}
-            <div class="col-span-full py-20 text-center">
-                <i class="fa-solid fa-box-open text-6xl opacity-20 mb-4"></i>
-                <h3 class="text-xl font-bold opacity-50">Nenhum produto encontrado.</h3>
+            <div class="col-span-full py-24 text-center">
+                <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-slate-50 mb-6">
+                    <i class="fa-solid fa-box-open text-4xl text-slate-200"></i>
+                </div>
+                <h3 class="text-2xl font-black text-slate-300 uppercase tracking-widest">Nenhum produto disponível</h3>
+                <p class="text-slate-400 mt-2 font-medium">Tente alterar os filtros ou volte mais tarde.</p>
             </div>
         {% endfor %}
     </section>
 </div>
 
 <dialog id="modal_confirmar_resgate" class="modal modal-bottom sm:modal-middle">
-    <div class="modal-box border-2 border-primary/20">
-        <h3 class="font-bold text-2xl text-[#00295d] flex items-center gap-2">
-            <i class="fa-solid fa-circle-question text-primary"></i> Confirmar Resgate
-        </h3>
-        <p class="py-4 text-lg">
-            Você deseja trocar seus pontos pelo prêmio: <br>
-            <span id="nome_produto_confirm" class="font-black text-primary text-xl"></span>?
-        </p>
-        <div class="modal-action flex gap-2">
-            <form id="form_resgate_final" method="post" action="">
-                <button type="submit" class="btn btn-primary text-white px-8">Sim, Resgatar!</button>
-            </form>
-            <form method="dialog">
-                <button class="btn btn-ghost">Cancelar</button>
-            </form>
+    <div class="modal-box p-0 rounded-3xl border-none overflow-hidden shadow-2xl">
+        <div class="bg-[#00295d] p-8 text-center text-white relative">
+            <i class="fa-solid fa-circle-question text-6xl opacity-20 absolute -right-4 -top-4"></i>
+            <h3 class="font-black text-2xl relative z-10">Confirmar Resgate?</h3>
+        </div>
+        <div class="p-8 text-center">
+            <p class="text-slate-500 font-medium">Você está prestes a trocar seus pontos por:</p>
+            <div id="nome_produto_confirm" class="font-black text-2xl text-[#00295d] mt-2 mb-8"></div>
+            
+            <div class="flex flex-col gap-3">
+                <form id="form_resgate_final" method="post" action="">
+                    <button type="submit" class="btn bg-[#00295d] hover:bg-blue-900 border-none text-white btn-block h-14 rounded-2xl font-black shadow-lg shadow-blue-900/20">
+                        SIM, QUERO RESGATAR!
+                    </button>
+                </form>
+                <form method="dialog">
+                    <button class="btn btn-ghost text-slate-400 btn-block font-bold">Cancelar e Voltar</button>
+                </form>
+            </div>
         </div>
     </div>
-    <form method="dialog" class="modal-backdrop bg-black/60"><button>close</button></form>
+    <form method="dialog" class="modal-backdrop bg-slate-900/60 backdrop-blur-sm"><button>fechar</button></form>
 </dialog>
 
 <script>
     function abrirConfirmacao(produtoId, produtoNome) {
-        // Define o nome do produto no texto do modal
         document.getElementById('nome_produto_confirm').innerText = produtoNome;
-        
-        // Ajusta o action do formulário dinamicamente para a rota de resgate
         const form = document.getElementById('form_resgate_final');
         form.action = "/resgatar/" + produtoId;
-        
-        // Abre o modal estilizado
         document.getElementById('modal_confirmar_resgate').showModal();
     }
 </script>

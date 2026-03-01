@@ -2,14 +2,7 @@
 {% block title %}Gestão de Usuários - PinturaFiel{% endblock %}
 
 {% block content %}
-<style>
-    .dt-search input { @apply input input-bordered input-sm bg-white text-gray-700 !important; border-color: #d1d5db !important; }
-    .dt-paging-button { @apply btn btn-sm btn-ghost !important; background-color: white !important; color: #00295d !important; border: 1px solid #e5e7eb !important; }
-    .dt-paging-button.current { @apply btn-primary text-white !important; border: none !important; }
-    .buttons-excel { @apply btn btn-success btn-sm text-white border-none shadow-sm !important; background-color: #22c55e !important; }
-    .dt-container { @apply text-gray-700 !important; }
-    .dt-info { @apply text-xs opacity-70 !important; }
-</style>
+
 
 <div class="max-w-[98%] mx-auto space-y-6 pb-10">
     
@@ -278,7 +271,7 @@ $(document).ready(function() {
     $('#tabelaPintores').DataTable({
         language: { url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json' },
         pageLength: 10,
-        dom: '<"flex justify-between items-center mb-4"B f>rt<"flex justify-between items-center mt-4"i p>',
+        dom: '<"flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-4"Bf>rt<"flex flex-col md:flex-row md:justify-between md:items-center gap-3 mt-4"ip>',
         buttons: [{
             extend: 'excelHtml5',
             text: '<i class="fa-solid fa-file-excel mr-2"></i> Exportar Excel',

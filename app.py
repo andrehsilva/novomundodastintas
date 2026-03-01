@@ -331,22 +331,32 @@ def index():
 
 @app.route("/catalogo")
 def catalogo():
-    # Captura a categoria da URL (ex: /catalogo?categoria=Tintas)
+    # Captura os parâmetros da URL
     categoria_selecionada = request.args.get('categoria')
+    ordem_selecionada = request.args.get('ordem', 'asc') # 'asc' é o padrão se não houver clique
     
     query = Product.query
+    
+    # Aplica o filtro de categoria se existir
     if categoria_selecionada:
         query = query.filter_by(categoria=categoria_selecionada)
     
-    produtos = query.order_by(Product.valor_pontos.asc()).all()
+    # Aplica a ordenação correta baseada no clique do usuário
+    if ordem_selecionada == 'desc':
+        query = query.order_by(Product.valor_pontos.desc())
+    else:
+        query = query.order_by(Product.valor_pontos.asc())
     
-    # Busca categorias únicas para o filtro
+    produtos = query.all()
+    
+    # Busca categorias únicas para preencher o seletor
     categorias = [c[0] for c in db.session.query(Product.categoria).distinct().all() if c[0]]
     
     return render_template("catalogo.html", 
                            produtos=produtos, 
                            categorias=categorias, 
-                           categoria_ativa=categoria_selecionada)
+                           categoria_ativa=categoria_selecionada,
+                           ordem_atual=ordem_selecionada) # Passa a ordem atual para manter o seletor marcado
 
 @app.route("/extrato")
 @login_required

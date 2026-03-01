@@ -55,6 +55,72 @@
         .animate-toast { animation: fadeInDown 0.5s ease-out; }
         @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
       </style>
+
+<style>
+    /* ==== DataTables (combina com DaisyUI) ==== */
+  
+    /* container */
+    .dt-container { color: inherit; }
+  
+    /* barra de pesquisa */
+    .dt-search { display:flex; align-items:center; gap:.5rem; }
+    .dt-search label { font-size: .875rem; opacity:.75; }
+    .dt-search input{
+      padding: .45rem .75rem;
+      border-radius: .75rem;
+      border: 1px solid rgba(0,0,0,.12);
+      background: #fff;
+      color: inherit;
+      height: 2.25rem;
+      min-width: 220px;
+      outline: none;
+    }
+    .dt-search input:focus{
+      border-color: rgba(37,99,235,.55);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.18);
+    }
+  
+    /* paginação */
+    .dt-paging { display:flex; align-items:center; gap:.25rem; }
+    .dt-paging-button{
+      padding: .4rem .7rem;
+      border-radius: .75rem;
+      background: #fff;
+      color: #00295d;
+      border: 1px solid rgba(0,0,0,.10);
+      cursor: pointer;
+      user-select: none;
+    }
+    .dt-paging-button:hover{
+      background: rgba(0,0,0,.04);
+    }
+    .dt-paging-button.disabled{
+      opacity:.45;
+      cursor:not-allowed;
+    }
+    .dt-paging-button.current{
+      background: #2563eb;
+      color: #fff;
+      border-color: transparent;
+    }
+  
+    /* info */
+    .dt-info { font-size: .75rem; opacity: .65; }
+  
+    /* botão Exportar (Buttons ext) */
+    .buttons-excel{
+      padding: .45rem .75rem;
+      border-radius: .75rem;
+      background: #22c55e;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+    .buttons-excel:hover{ filter: brightness(0.95); }
+  
+    /* opcional: melhora tabela */
+    table.dataTable thead th { font-weight: 700; }
+  </style>
       
 </head>
 <body class="min-h-screen bg-base-200 text-base-content font-sans">

@@ -1,25 +1,26 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="flex justify-center items-center min-h-[85vh] bg-gradient-to-tr from-slate-100 via-slate-50 to-blue-50 p-4">
-  <div class="card w-full max-w-md bg-base-100 shadow-2xl border border-white overflow-hidden rounded-3xl">
+<div class="flex justify-center items-center min-h-screen bg-gradient-to-tr from-slate-100 via-slate-50 to-blue-100 p-4 md:p-10">
+  <div class="card w-full max-w-sm bg-base-100 shadow-2xl border border-white overflow-hidden rounded-3xl transition-all">
     
     <div class="bg-[#00295d] p-10 text-center relative">
-      <div class="absolute top-0 right-0 p-4 opacity-10">
-          <i class="fa-solid fa-paint-roller text-6xl text-white"></i>
+      <div class="absolute top-0 right-0 p-4 opacity-5">
+          <i class="fa-solid fa-paint-roller text-7xl text-white"></i>
       </div>
       <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-md mb-4 border border-white/20">
-        <i class="fa-solid fa-user-check text-4xl text-white"></i>
+        <i class="fa-solid fa-user-lock text-4xl text-white"></i>
       </div>
-      <h2 class="text-3xl font-extrabold text-white tracking-tight">PinturaFiel</h2>
-      <p class="text-blue-200/80 text-sm mt-2 font-medium">Acesse seu painel de pontos e prêmios</p>
+      <h2 class="text-3xl font-black text-white tracking-tight">Login</h2>
+      <p class="text-blue-200/80 text-sm mt-2 font-medium">Clube PinturaFiel</p>
     </div>
 
-    <div class="card-body p-10 bg-white">
+    <div class="card-body p-8 md:p-12 bg-white">
+      
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
           {% for category, message in messages %}
-            <div class="alert {% if category == 'error' %}alert-error{% else %}alert-info{% endif %} mb-6 rounded-xl animate-bounce">
+            <div class="alert {% if category == 'error' %}alert-error{% else %}alert-info{% endif %} mb-6 rounded-2xl text-sm animate-pulse">
               <span>{{ message }}</span>
             </div>
           {% endfor %}
@@ -27,6 +28,7 @@
       {% endwith %}
 
       <form method="post" id="loginForm" class="space-y-6">
+        
         <div class="form-control">
           <label class="label pt-0">
             <span class="label-text font-bold text-slate-700">Telefone Celular</span>
@@ -40,19 +42,19 @@
               name="telefone"
               id="login_telefone"
               placeholder="(00) 00000-0000"
-              class="input input-bordered w-full pl-12 bg-slate-50 border-slate-200 focus:border-[#00295d] focus:ring-2 focus:ring-[#00295d]/10 transition-all text-lg font-medium"
+              class="input input-bordered w-full pl-12 bg-slate-50 border-slate-200 focus:border-[#00295d] focus:ring-2 focus:ring-[#00295d]/10 transition-all font-black"
               required
             />
           </div>
-          <div class="flex justify-between mt-2">
-            <span id="tel_helper" class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">DDD + NÚMERO</span>
+          <div class="flex justify-between mt-2 px-1">
+            <span class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">DDD + Número</span>
             <span id="char_counter" class="text-[10px] font-black text-slate-300">0/11</span>
           </div>
         </div>
 
         <div class="form-control">
           <label class="label pt-0">
-            <span class="label-text font-bold text-slate-700">Sua Senha</span>
+            <span class="label-text font-bold text-slate-700">Senha</span>
           </label>
           <div class="relative group">
             <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 group-focus-within:text-[#00295d] transition-colors">
@@ -61,27 +63,30 @@
             <input
               type="password"
               name="senha"
-              class="input input-bordered w-full pl-12 bg-slate-50 border-slate-200 focus:border-[#00295d] focus:ring-2 focus:ring-[#00295d]/10 transition-all text-lg"
+              placeholder="••••••••"
+              class="input input-bordered w-full pl-12 bg-slate-50 border-slate-200 focus:border-[#00295d] transition-all"
               required
             />
           </div>
           <div class="flex justify-end mt-2">
-            <a href="{{ url_for('esqueci_senha') }}" class="text-xs text-[#00295d] hover:text-blue-800 font-bold transition-colors">
+            <a href="{{ url_for('esqueci_senha') }}" class="text-xs text-[#00295d] hover:underline font-bold transition-colors">
               Esqueceu a senha?
             </a>
           </div>
         </div>
 
-        <button type="submit" class="btn bg-[#00295d] hover:bg-blue-900 border-none w-full text-white text-lg font-black shadow-xl shadow-blue-900/20 py-4 h-auto rounded-xl transition-all hover:-translate-y-1">
-            ENTRAR NO CLUBE
+        <button type="submit" class="btn bg-[#00295d] hover:bg-blue-900 border-none w-full text-white text-lg font-black shadow-xl shadow-blue-900/20 py-4 h-auto rounded-2xl transition-all hover:-translate-y-1 uppercase tracking-widest">
+            Entrar no Painel
         </button>
       </form>
 
-      <div class="divider my-10 text-slate-300 text-[10px] font-bold tracking-widest">OU CADASTRE-SE</div>
+      <div class="divider my-10 text-slate-300 text-[10px] font-bold tracking-widest uppercase">Ainda não tem conta?</div>
       
-      <a href="{{ url_for('register') }}" class="btn btn-ghost btn-block text-slate-500 hover:text-[#00295d] font-bold">
-        Sou novo por aqui
-      </a>
+      <div class="text-center">
+        <a href="{{ url_for('register') }}" class="btn btn-ghost btn-block text-slate-400 hover:text-[#00295d] font-bold transition-all">
+          Solicitar meu Cadastro
+        </a>
+      </div>
     </div>
   </div>
 </div>
@@ -92,6 +97,7 @@
     const $tel = $('#login_telefone');
     const $counter = $('#char_counter');
 
+    // Máscara rígida para 11 dígitos
     $tel.mask('(00) 00000-0000', {
       onKeyPress: function(val, e, field, options) {
         const digits = val.replace(/\D/g, "").length;
@@ -105,11 +111,12 @@
       }
     });
 
+    // Impede envio se não tiver 11 dígitos
     $('#loginForm').on('submit', function (e) {
       const digits = $tel.val().replace(/\D/g, "");
       if (digits.length < 11) {
         e.preventDefault();
-        alert("Atenção: Insira os 11 dígitos do seu telefone (DDD + Número).");
+        alert("Por favor, insira o número completo com DDD (11 dígitos).");
         $tel.focus();
       }
     });

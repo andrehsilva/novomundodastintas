@@ -1,32 +1,58 @@
-{% extends 'base.html' %}
-{% block content %}
-<div class="flex justify-center items-center py-10">
-  <div class="card w-full max-w-sm bg-base-100 shadow-2xl border">
-    <div class="card-body">
-      <h2 class="card-title justify-center text-2xl font-bold text-[#00295d]">Acessar Conta</h2>
-      <form method="post" class="space-y-4">
-        <div class="form-control">
-          <label class="label"><span class="label-text font-bold">Telefone</span></label>
-          <input type="text" name="telefone" id="login_telefone" placeholder="(00) 00000-0000" class="input input-bordered" required />
-        </div>
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text font-bold">Senha</span>
-            <a href="{{ url_for('esqueci_senha') }}" class="label-text-alt link link-primary">Esqueci a senha?</a>
-          </label>
-          <input type="password" name="senha" class="input input-bordered" required />
-        </div>
-        <button class="btn btn-primary w-full text-white">Entrar</button>
-      </form>
-    </div>
-  </div>
-</div>
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+
 <script>
-$(document).ready(function() {
-    $('#login_telefone').mask('(00) 00000-0000');
-});
+  function maskBehavior(val) {
+    // remove tudo que não for dígito
+    const digits = val.replace(/\D/g, '');
+    // 11 dígitos -> celular / 10 dígitos -> fixo
+    return (digits.length > 10) ? '(00) 00000-0000' : '(00) 0000-0000';
+  }
+
+  const maskOptions = {
+    onKeyPress: function(val, e, field, options) {
+      field.mask(maskBehavior(val), options);
+    }
+  };
+
+  $(document).ready(function() {
+    const $tel = $('#login_telefone');
+
+    // Aplica máscara dinâmica
+    $tel.mask(maskBehavior($tel.val()), maskOptions);
+
+    // Bloqueia letras/símbolos (permite apenas teclas de navegação e backspace)
+    $tel.on('keydown', function(e) {
+      const allowed = [
+        'Backspace','Delete','Tab','Escape','Enter',
+        'ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'
+      ];
+      if (allowed.includes(e.key)) return;
+
+      // permite Ctrl/Cmd + A/C/V/X
+      if ((e.ctrlKey || e.metaKey) && ['a','c','v','x'].includes(e.key.toLowerCase())) return;
+
+      // permite apenas números
+      if (!/^\d$/.test(e.key)) e.preventDefault();
+    });
+
+    // Se colar algo, limpa para somente dígitos e remasca
+    $tel.on('paste', function() {
+      setTimeout(() => {
+        const digits = $tel.val().replace(/\D/g, '');
+        $tel.val(digits);
+        $tel.mask(maskBehavior($tel.val()), maskOptions);
+      }, 0);
+    });
+
+    // Validação final ao enviar: obriga 10 ou 11 dígitos
+    $tel.closest('form').on('submit', function(e) {
+      const digits = $tel.val().replace(/\D/g, '');
+      if (!(digits.length === 10 || digits.length === 11)) {
+        e.preventDefault();
+        alert('Digite um telefone válido com DDD (10 ou 11 números).');
+        $tel.focus();
+      }
+    });
+  });
 </script>
-{% endblock %}

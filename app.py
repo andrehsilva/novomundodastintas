@@ -46,54 +46,54 @@ def load_user(user_id):
 
 # ... (imports e configurações iniciais permanecem os mesmos)
 
+# --- Rota de Login por Telefone ---
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    if current_user.is_authenticated:
-        return redirect(url_for("index"))
-        
     if request.method == "POST":
-        # O campo 'telefone' deve bater com o 'name' no HTML
-        identificador = request.form.get("telefone") 
+        identificador = request.form.get("telefone")
         senha = request.form.get("senha")
-        
-        # Busca no banco pelo telefone (pintor) ou email (admin)
         user = User.query.filter_by(telefone=identificador).first() or \
                User.query.filter_by(email=identificador).first()
         
         if user and user.senha_hash == senha:
             if not user.ativo and user.role != 'admin':
-                flash("Sua conta aguarda ativação.", "warning")
+                flash("Aguarde a ativação da sua conta.", "warning")
                 return redirect(url_for("login"))
             login_user(user)
             return redirect(url_for("index"))
-        
         flash("Credenciais inválidas.", "error")
+    return render_template("login.html")
+
+# --- Cadastro de Novo Profissional (Admin) ---
+@app.route("/admin/usuarios/novo", methods=["POST"])
+@login_required
+def admin_novo_usuario():
+    if current_user.role != 'admin': return redirect(url_for("index"))
     
-    return render_template("login.html") # Certifique-se que o arquivo existe
-
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    if request.method == "POST":
-        telefone = request.form.get("telefone")
-        if User.query.filter_by(telefone=telefone).first():
-            flash("Este telefone já está cadastrado.", "error")
-            return redirect(url_for("register"))
-
-        novo_usuario = User(
+    telefone = request.form.get("telefone")
+    email_raw = request.form.get("email")
+    
+    # Transforma string vazia em None para o banco aceitar
+    email = email_raw if email_raw and email_raw.strip() != "" else None
+    
+    if User.query.filter_by(telefone=telefone).first():
+        flash("Este telefone já está cadastrado.", "error")
+    else:
+        novo = User(
             nome=request.form.get("nome"),
-            telefone=telefone, # Salva o telefone
-            email=request.form.get("email"),
-            cpf_cnpj=request.form.get("cpf_cnpj"),
-            senha_hash=request.form.get("senha"), 
+            telefone=telefone,
+            email=email,
+            cpf_cnpj=request.form.get("cpf_cnpj") or None,
+            senha_hash=request.form.get("senha") or None,
             role='pintor',
-            ativo=False 
+            ativo=True
         )
-        db.session.add(novo_usuario)
+        db.session.add(novo)
         db.session.commit()
-        flash("Cadastro realizado! Aguarde a ativação pela loja.", "info")
-        return redirect(url_for("login"))
-    
-    return render_template("register.html")
+        flash(f"Profissional {novo.nome} cadastrado com sucesso!", "success")
+    return redirect(url_for("admin_usuarios"))
+
+
 
 # ... (restante do arquivo permanece igual)
 

@@ -215,15 +215,64 @@
             </div>
         </div>
     </dialog>
+    <!-- MODAL EDITAR -->
+<dialog id="modal_edit_{{ p.id }}" class="modal">
+    <div class="modal-box max-w-md">
+      <h3 class="font-bold text-lg mb-4">Editar: {{ p.nome }}</h3>
+  
+      <form action="{{ url_for('admin_editar_usuario', id=p.id) }}" method="POST" class="space-y-3">
+        <input type="text" name="nome" class="input input-bordered w-full" value="{{ p.nome }}" required>
+  
+        <input type="text" name="telefone" class="input input-bordered w-full telefone-mask"
+               value="{{ p.telefone }}" placeholder="Telefone (Login)" required>
+  
+        <input type="email" name="email" class="input input-bordered w-full"
+               value="{{ p.email or '' }}" placeholder="E-mail (opcional)">
+  
+        <input type="text" name="cpf_cnpj" class="input input-bordered w-full"
+               value="{{ p.cpf_cnpj or '' }}" placeholder="CPF/CNPJ">
+  
+        <input type="text" name="senha" class="input input-bordered w-full"
+               placeholder="Nova senha (deixe em branco para manter)">
+  
+        <button class="btn btn-warning w-full text-white">Salvar alterações</button>
+      </form>
+  
+      <form method="dialog" class="mt-2">
+        <button class="btn btn-sm btn-ghost w-full">Cancelar</button>
+      </form>
+    </div>
+  </dialog>
+  
+  <!-- MODAL DELETAR -->
+  <dialog id="modal_del_{{ p.id }}" class="modal">
+    <div class="modal-box max-w-sm">
+      <h3 class="font-bold text-lg mb-2 text-error">Excluir usuário</h3>
+      <p class="text-sm opacity-70 mb-4">
+        Tem certeza que deseja excluir <b>{{ p.nome }}</b>?
+        Essa ação não pode ser desfeita.
+      </p>
+  
+      <form action="{{ url_for('admin_deletar_usuario', id=p.id) }}" method="POST">
+        <button class="btn btn-error w-full text-white">Sim, excluir</button>
+      </form>
+  
+      <form method="dialog" class="mt-2">
+        <button class="btn btn-sm btn-ghost w-full">Cancelar</button>
+      </form>
+    </div>
+  </dialog>
     {% endfor %}
 
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+
 <script>
 $(document).ready(function() {
     // Aplicar máscara de telefone
     $('#reg_telefone').mask('(00) 00000-0000');
+    $('.telefone-mask').mask('(00) 00000-0000');
 
     // Configuração DataTables Principal
     $('#tabelaPintores').DataTable({
@@ -246,5 +295,6 @@ $(document).ready(function() {
         dom: 'frtip'
     });
 });
+
 </script>
 {% endblock %}

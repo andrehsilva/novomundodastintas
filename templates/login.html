@@ -1,63 +1,116 @@
-<!doctype html>
-<html lang="pt-br">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Login</title>
+{# templates/login.html #}
+{% extends 'base.html' %}
 
-  <!-- Se você usa Tailwind/Daisy via CDN no base, coloque aqui também -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
-</head>
+{% block content %}
+<div class="flex justify-center items-center min-h-[80vh] p-4">
+  <div class="card w-full max-w-sm bg-base-100 shadow-2xl border">
+    <div class="card-body">
+      <h2 class="card-title justify-center text-2xl font-bold text-[#00295d]">
+        Acessar Conta
+      </h2>
 
-<body class="bg-base-200">
-  <div class="flex justify-center items-center min-h-screen p-4">
-    <div class="card w-full max-w-sm bg-base-100 shadow-2xl border">
-      <div class="card-body">
-        <h2 class="card-title justify-center text-2xl font-bold text-[#00295d]">Acessar Conta</h2>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            <div class="space-y-2">
-              {% for category, message in messages %}
-                <div class="alert {% if category == 'error' %}alert-error{% elif category == 'warning' %}alert-warning{% else %}alert-info{% endif %}">
-                  <span>{{ message }}</span>
-                </div>
-              {% endfor %}
-            </div>
-          {% endif %}
-        {% endwith %}
-
-        <form method="post" class="space-y-4">
-          <div class="form-control">
-            <label class="label"><span class="label-text font-bold">Telefone</span></label>
-            <input type="text" name="telefone" id="login_telefone"
-                   placeholder="(00) 00000-0000" class="input input-bordered" required />
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="space-y-2">
+            {% for category, message in messages %}
+              <div class="alert
+                {% if category == 'error' %}alert-error
+                {% elif category == 'warning' %}alert-warning
+                {% elif category == 'success' %}alert-success
+                {% else %}alert-info{% endif %}">
+                <span>{{ message }}</span>
+              </div>
+            {% endfor %}
           </div>
+        {% endif %}
+      {% endwith %}
 
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-bold">Senha</span>
-              <a href="{{ url_for('esqueci_senha') }}" class="label-text-alt link link-primary">Esqueci a senha?</a>
-            </label>
-            <input type="password" name="senha" class="input input-bordered" required />
-          </div>
+      <form method="post" id="loginForm" class="space-y-4 mt-2">
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-bold">Telefone (ou e-mail)</span>
+          </label>
+          <input
+            type="text"
+            name="telefone"
+            id="login_telefone"
+            placeholder="(00) 00000-0000"
+            class="input input-bordered w-full"
+            autocomplete="username"
+            required
+          />
+          <label class="label">
+            <span class="label-text-alt opacity-70">Use DDD + número (10 ou 11 dígitos)</span>
+          </label>
+        </div>
 
-          <button class="btn btn-primary w-full text-white">Entrar</button>
-        </form>
-      </div>
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-bold">Senha</span>
+            <a href="{{ url_for('esqueci_senha') }}" class="label-text-alt link link-primary">
+              Esqueci a senha?
+            </a>
+          </label>
+          <input
+            type="password"
+            name="senha"
+            class="input input-bordered w-full"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+
+        <button class="btn btn-primary w-full text-white">Entrar</button>
+      </form>
     </div>
   </div>
+</div>
 
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
-  <script>
-    // Blinda caso o CDN falhe
-    document.addEventListener('DOMContentLoaded', function() {
-      if (window.jQuery && jQuery.fn && jQuery.fn.mask) {
-        $('#login_telefone').mask('(00) 00000-0000');
-      }
+<!-- IMPORTANTE:
+     Não carregue jQuery aqui se o base.html já carrega.
+     Só o plugin de máscara. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+
+<script>
+  (function () {
+    function onlyDigits(v) { return (v || "").replace(/\D/g, ""); }
+
+    function maskBehavior(val) {
+      const digits = onlyDigits(val);
+      return (digits.length > 10) ? "(00) 00000-0000" : "(00) 0000-0000";
+    }
+
+    function applyMask($el) {
+      if (!window.jQuery) return;
+      if (!jQuery.fn || !jQuery.fn.mask) return;
+      $el.mask(maskBehavior($el.val()), {
+        onKeyPress: function (val, e, field, options) {
+          field.mask(maskBehavior(val), options);
+        }
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      if (!window.jQuery) return;
+
+      const $tel = jQuery("#login_telefone");
+      if ($tel.length) applyMask($tel);
+
+      // Validação final: se parece telefone, exige 10 ou 11 dígitos
+      jQuery("#loginForm").on("submit", function (e) {
+        const v = ($tel.val() || "").trim();
+
+        // Se o usuário digitou email, não valida como telefone
+        if (v.includes("@")) return;
+
+        const digits = onlyDigits(v);
+        if (!(digits.length === 10 || digits.length === 11)) {
+          e.preventDefault();
+          alert("Digite um telefone válido com DDD (10 ou 11 números).");
+          $tel.focus();
+        }
+      });
     });
-  </script>
-</body>
-</html>
+  })();
+</script>
+{% endblock %}

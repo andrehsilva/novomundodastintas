@@ -19,15 +19,43 @@
     <script src="https://cdn.datatables.net/buttons/3.0.0/js/buttons.html5.min.js"></script>
     
     <style>
-        /* Estilização Customizada DataTables para o Tema Claro */
-        .dt-search input { @apply input input-bordered input-sm bg-white text-base-content !important; border-color: #d1d5db !important; }
-        .dt-paging-button { @apply btn btn-sm btn-ghost !important; background-color: white !important; color: #00295d !important; border: 1px solid #e5e7eb !important; }
-        .dt-paging-button.current { @apply btn-primary text-white !important; border: none !important; }
-        .buttons-excel { @apply btn btn-success btn-sm text-white border-none shadow-sm !important; background-color: #22c55e !important; }
-        
+        /* DataTables – ajustes simples compatíveis com CDN */
+        .dt-search input{
+          padding: .25rem .5rem;
+          border-radius: .5rem;
+          border: 1px solid #d1d5db;
+          background: #fff;
+          color: inherit;
+          height: 2rem;
+        }
+      
+        .dt-paging-button{
+          padding: .25rem .5rem;
+          border-radius: .5rem;
+          background: #fff;
+          color: #00295d;
+          border: 1px solid #e5e7eb;
+          margin: 0 .125rem;
+        }
+      
+        .dt-paging-button.current{
+          background: #2563eb;
+          color: #fff;
+          border: none;
+        }
+      
+        .buttons-excel{
+          padding: .25rem .5rem;
+          border-radius: .5rem;
+          background: #22c55e;
+          color: #fff;
+          border: none;
+        }
+      
         .animate-toast { animation: fadeInDown 0.5s ease-out; }
         @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
+      </style>
+      
 </head>
 <body class="min-h-screen bg-base-200 text-base-content font-sans">
 

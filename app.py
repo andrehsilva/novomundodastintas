@@ -237,7 +237,7 @@ def admin_premios():
                 nome=request.form.get("nome"),
                 descricao=request.form.get("descricao"),
                 valor_pontos=parse_int(request.form.get("valor_pontos"), 0),
-                categoria=request.form.get("categoria"),
+                categoria="Geral", # Define um valor padrão interno
                 imagem_url=imagem_url
             )
             db.session.add(novo)
@@ -246,6 +246,30 @@ def admin_premios():
         return redirect(url_for("admin_premios"))
     produtos = Product.query.order_by(Product.nome).all()
     return render_template("admin_premios.html", produtos=produtos)
+
+
+@app.route("/admin/premios/editar/<int:id>", methods=["POST"])
+@login_required
+def editar_produto(id):
+    if current_user.role != 'admin': return redirect(url_for("index"))
+    produto = Product.query.get_or_404(id)
+    produto.nome = request.form.get("nome")
+    produto.descricao = request.form.get("descricao")
+    produto.valor_pontos = parse_int(request.form.get("valor_pontos"), 0)
+    # Categoria removida do formulário
+
+    file = request.files.get("imagem_file")
+    if file and allowed_file(file.filename):
+        filename = f"{datetime.now().timestamp()}_{file.filename}"
+        filepath = f"public/{filename}"
+        supabase.storage.from_(bucket_name).upload(filepath, file.read())
+        produto.imagem_url = supabase.storage.from_(bucket_name).get_public_url(filepath)
+
+    db.session.commit()
+    flash(f"Prêmio '{produto.nome}' atualizado!", "success")
+    return redirect(url_for("admin_premios"))
+
+
 
 @app.route("/admin/excluir_produto/<int:id>", methods=["POST"])
 @login_required
@@ -257,28 +281,6 @@ def excluir_produto(id):
     flash("Produto removido!", "warning")
     return redirect(url_for("admin_premios"))
 
-@app.route("/admin/premios/editar/<int:id>", methods=["POST"])
-@login_required
-def editar_produto(id):
-    if current_user.role != 'admin': return redirect(url_for("index"))
-    
-    produto = Product.query.get_or_404(id)
-    produto.nome = request.form.get("nome")
-    produto.descricao = request.form.get("descricao")
-    produto.valor_pontos = parse_int(request.form.get("valor_pontos"), 0)
-    produto.categoria = request.form.get("categoria")
-
-    # Verifica se uma nova imagem foi enviada
-    file = request.files.get("imagem_file")
-    if file and allowed_file(file.filename):
-        filename = f"{datetime.now().timestamp()}_{file.filename}"
-        filepath = f"public/{filename}"
-        supabase.storage.from_(bucket_name).upload(filepath, file.read())
-        produto.imagem_url = supabase.storage.from_(bucket_name).get_public_url(filepath)
-
-    db.session.commit()
-    flash(f"Prêmio '{produto.nome}' atualizado com sucesso!", "success")
-    return redirect(url_for("admin_premios"))
 
 # --- Fluxo de Resgates e Ativação ---
 
@@ -356,34 +358,13 @@ def index():
                            transacoes=transacoes, 
                            competidores_acima=posicao_superior)
 
+
 @app.route("/catalogo")
 def catalogo():
-    # Captura os parâmetros da URL
-    categoria_selecionada = request.args.get('categoria')
-    ordem_selecionada = request.args.get('ordem', 'asc') # 'asc' é o padrão se não houver clique
-    
-    query = Product.query
-    
-    # Aplica o filtro de categoria se existir
-    if categoria_selecionada:
-        query = query.filter_by(categoria=categoria_selecionada)
-    
-    # Aplica a ordenação correta baseada no clique do usuário
-    if ordem_selecionada == 'desc':
-        query = query.order_by(Product.valor_pontos.desc())
-    else:
-        query = query.order_by(Product.valor_pontos.asc())
-    
-    produtos = query.all()
-    
-    # Busca categorias únicas para preencher o seletor
-    categorias = [c[0] for c in db.session.query(Product.categoria).distinct().all() if c[0]]
-    
-    return render_template("catalogo.html", 
-                           produtos=produtos, 
-                           categorias=categorias, 
-                           categoria_ativa=categoria_selecionada,
-                           ordem_atual=ordem_selecionada) # Passa a ordem atual para manter o seletor marcado
+    # Removida toda a lógica de filtros e busca de categorias
+    produtos = Product.query.order_by(Product.valor_pontos.asc()).all()
+    return render_template("catalogo.html", produtos=produtos)
+
 
 @app.route("/extrato")
 @login_required

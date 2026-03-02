@@ -22,43 +22,6 @@
         <i class="fa-solid fa-gift text-[12rem] opacity-5 absolute -right-10 -bottom-10 rotate-12"></i>
     </div>
 
-    <div class="card bg-white shadow-xl border border-slate-100 rounded-3xl overflow-hidden">
-        <div class="bg-slate-50 px-8 py-4 border-b border-slate-100 flex items-center gap-2">
-            <i class="fa-solid fa-sliders text-[#00295d]"></i>
-            <h2 class="font-black text-[#00295d] uppercase tracking-widest text-[10px]">Filtrar por Preferência</h2>
-        </div>
-        <div class="p-6">
-            <form method="get" action="{{ url_for('catalogo') }}" class="flex flex-wrap gap-6 items-end">
-                <div class="form-control flex-1 min-w-[200px]">
-                    <label class="label"><span class="label-text font-bold text-slate-500 text-xs uppercase">Categoria</span></label>
-                    <select name="categoria" class="select select-bordered bg-slate-50 border-slate-200 focus:border-[#00295d] rounded-xl">
-                        <option value="">Todas as categorias</option>
-                        {% for cat in categorias %}
-                            <option value="{{ cat }}" {{ 'selected' if categoria_ativa == cat }}>{{ cat }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="form-control flex-1 min-w-[200px]">
-                    <label class="label"><span class="label-text font-bold text-slate-500 text-xs uppercase">Ordem de Preço</span></label>
-                    <select name="ordem" class="select select-bordered bg-slate-50 border-slate-200 focus:border-[#00295d] rounded-xl">
-                        <option value="asc" {{ 'selected' if ordem_atual == 'asc' }}>Crescente (Menor para Maior)</option>
-                        <option value="desc" {{ 'selected' if ordem_atual == 'desc' }}>Decrescente (Maior para Menor)</option>
-                    </select>
-                </div>
-
-                <div class="flex gap-2">
-                    <button type="submit" class="btn bg-[#00295d] hover:bg-blue-900 border-none text-white px-8 rounded-xl shadow-lg shadow-blue-900/20">
-                        Aplicar
-                    </button>
-                    <a href="{{ url_for('catalogo') }}" class="btn btn-ghost text-slate-400 hover:bg-slate-100 rounded-xl">
-                        Limpar
-                    </a>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <section class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {% for produto in produtos %}
             <article class="card bg-white shadow-xl border border-slate-100 rounded-[2.5rem] overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group">
@@ -68,10 +31,6 @@
                     {% else %}
                         <img src="{{ url_for('static', filename=produto.imagem_url) }}" alt="{{ produto.nome }}" class="h-full w-full object-cover group-hover:scale-110 transition-transform duration-700" />
                     {% endif %}
-                    
-                    <div class="absolute top-4 left-4">
-                        <span class="badge bg-[#00295d]/80 backdrop-blur-md border-none text-white py-3 px-4 font-bold text-[10px] tracking-widest uppercase">{{ produto.categoria }}</span>
-                    </div>
                 </figure>
 
                 <div class="card-body p-8">
@@ -122,7 +81,6 @@
                     <i class="fa-solid fa-box-open text-4xl text-slate-200"></i>
                 </div>
                 <h3 class="text-2xl font-black text-slate-300 uppercase tracking-widest">Nenhum produto disponível</h3>
-                <p class="text-slate-400 mt-2 font-medium">Tente alterar os filtros ou volte mais tarde.</p>
             </div>
         {% endfor %}
     </section>

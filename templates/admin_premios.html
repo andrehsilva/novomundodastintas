@@ -26,7 +26,6 @@
                         <tr>
                             <th class="w-24">Visualização</th>
                             <th>Produto</th>
-                            <th>Categoria</th>
                             <th>Valor Necessário</th>
                             <th class="text-center">Ações</th>
                         </tr>
@@ -48,9 +47,6 @@
                             <td>
                                 <div class="font-bold text-lg text-[#00295d]">{{ prod.nome }}</div>
                                 <div class="text-xs opacity-50 truncate max-w-xs">{{ prod.descricao }}</div>
-                            </td>
-                            <td>
-                                <span class="badge badge-ghost font-medium uppercase">{{ prod.categoria }}</span>
                             </td>
                             <td>
                                 <div class="font-bold text-primary flex items-center gap-1">
@@ -92,7 +88,6 @@
                                     </div>
                                     <div class="w-full md:w-1/2 space-y-4">
                                         <h3 class="font-bold text-2xl text-[#00295d]">{{ prod.nome }}</h3>
-                                        <span class="badge badge-primary">{{ prod.categoria }}</span>
                                         <div class="text-sm leading-relaxed opacity-80">{{ prod.descricao }}</div>
                                         <div class="divider"></div>
                                         <div class="flex justify-between items-center">
@@ -118,15 +113,9 @@
                                         <input type="text" name="nome" value="{{ prod.nome }}" class="input input-bordered w-full" required>
                                     </div>
 
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <div class="form-control">
-                                            <label class="label"><span class="label-text font-bold">Pontos</span></label>
-                                            <input type="number" name="valor_pontos" value="{{ prod.valor_pontos }}" class="input input-bordered w-full" required min="1">
-                                        </div>
-                                        <div class="form-control">
-                                            <label class="label"><span class="label-text font-bold">Categoria</span></label>
-                                            <input type="text" name="categoria" value="{{ prod.categoria }}" class="input input-bordered w-full" required>
-                                        </div>
+                                    <div class="form-control">
+                                        <label class="label"><span class="label-text font-bold">Pontos para Resgate</span></label>
+                                        <input type="number" name="valor_pontos" value="{{ prod.valor_pontos }}" class="input input-bordered w-full" required min="1">
                                     </div>
 
                                     <div class="form-control">
@@ -169,15 +158,9 @@
                     <input type="text" name="nome" placeholder="Ex: Kit de Trinchas Profissionais" class="input input-bordered w-full" required>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="form-control">
-                        <label class="label"><span class="label-text font-bold">Pontos</span></label>
-                        <input type="number" name="valor_pontos" placeholder="1500" class="input input-bordered w-full" required min="1">
-                    </div>
-                    <div class="form-control">
-                        <label class="label"><span class="label-text font-bold">Categoria</span></label>
-                        <input type="text" name="categoria" placeholder="Ex: Acessórios" class="input input-bordered w-full" required>
-                    </div>
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-bold">Pontos</span></label>
+                    <input type="number" name="valor_pontos" placeholder="1500" class="input input-bordered w-full" required min="1">
                 </div>
 
                 <div class="form-control">

@@ -19,42 +19,51 @@
     <script src="https://cdn.datatables.net/buttons/3.0.0/js/buttons.html5.min.js"></script>
     
     <style>
-        /* DataTables – ajustes simples compatíveis com CDN */
-        .dt-search input{
-          padding: .25rem .5rem;
-          border-radius: .5rem;
-          border: 1px solid #d1d5db;
-          background: #fff;
-          color: inherit;
-          height: 2rem;
+        /* ==== Ajuste DataTables para Tema Claro (Corporate) ==== */
+        .dt-container { color: #1f2937; } /* Cor do texto cinza escuro */
+        
+        .dt-search input {
+        padding: .45rem .75rem;
+        border-radius: .75rem;
+        border: 1px solid #d1d5db;
+        background: #ffffff !important; /* Força fundo branco */
+        color: #1f2937 !important;
+        height: 2.25rem;
+        outline: none;
         }
-      
-        .dt-paging-button{
-          padding: .25rem .5rem;
-          border-radius: .5rem;
-          background: #fff;
-          color: #00295d;
-          border: 1px solid #e5e7eb;
-          margin: 0 .125rem;
+
+        /* Ajuste dos botões de paginação para não ficarem pretos */
+        .dt-paging-button {
+        padding: .4rem .7rem;
+        border-radius: .75rem;
+        background: #ffffff !important;
+        color: #00295d !important;
+        border: 1px solid #e5e7eb !important;
+        cursor: pointer;
         }
-      
-        .dt-paging-button.current{
-          background: #2563eb;
-          color: #fff;
-          border: none;
+
+        .dt-paging-button.current {
+        background: #00295d !important; /* Azul da marca no botão ativo */
+        color: #ffffff !important;
+        border-color: transparent !important;
         }
-      
-        .buttons-excel{
-          padding: .25rem .5rem;
-          border-radius: .5rem;
-          background: #22c55e;
-          color: #fff;
-          border: none;
+
+        .dt-paging-button:hover:not(.current) {
+        background: #f3f4f6 !important;
         }
-      
-        .animate-toast { animation: fadeInDown 0.5s ease-out; }
-        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-      </style>
+
+        .dt-info { font-size: .75rem; color: #6b7280; }
+
+        /* Botão de Exportar Excel */
+        .buttons-excel {
+        background: #22c55e !important;
+        color: white !important;
+        border: none !important;
+        padding: 0.5rem 1rem !important;
+        border-radius: 0.5rem !important;
+        font-weight: bold;
+        }
+    </style>
 
     <style>
         /* ==== DataTables (combina com DaisyUI) ==== */

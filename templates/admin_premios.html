@@ -80,7 +80,6 @@
                         <dialog id="modal_detalhe_{{ prod.id }}" class="modal">
                             <div class="modal-box w-11/12 max-w-2xl border border-base-300">
                                 <form method="dialog"><button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button></form>
-                                
                                 <div class="flex flex-col md:flex-row gap-6">
                                     <div class="w-full md:w-1/2">
                                         <div class="rounded-xl overflow-hidden border shadow-sm bg-white">
@@ -104,6 +103,49 @@
                                 </div>
                             </div>
                             <form method="dialog" class="modal-backdrop bg-black/50"><button>close</button></form>
+                        </dialog>
+
+                        <dialog id="modal_editar_{{ prod.id }}" class="modal">
+                            <div class="modal-box max-w-lg border border-amber-200">
+                                <form method="dialog"><button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button></form>
+                                <h3 class="font-bold text-xl mb-6 text-amber-600 flex items-center gap-2">
+                                    <i class="fa-solid fa-pen-to-square"></i> Editar Prêmio
+                                </h3>
+                                
+                                <form method="post" action="{{ url_for('editar_produto', id=prod.id) }}" enctype="multipart/form-data" class="space-y-4">
+                                    <div class="form-control">
+                                        <label class="label"><span class="label-text font-bold">Nome do Produto</span></label>
+                                        <input type="text" name="nome" value="{{ prod.nome }}" class="input input-bordered w-full" required>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div class="form-control">
+                                            <label class="label"><span class="label-text font-bold">Pontos</span></label>
+                                            <input type="number" name="valor_pontos" value="{{ prod.valor_pontos }}" class="input input-bordered w-full" required min="1">
+                                        </div>
+                                        <div class="form-control">
+                                            <label class="label"><span class="label-text font-bold">Categoria</span></label>
+                                            <input type="text" name="categoria" value="{{ prod.categoria }}" class="input input-bordered w-full" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-control">
+                                        <label class="label"><span class="label-text font-bold">Nova Imagem (Opcional)</span></label>
+                                        <input type="file" name="imagem_file" class="file-input file-input-bordered w-full" accept="image/*">
+                                        <p class="text-[10px] opacity-50 mt-1 italic">Deixe em branco para manter a imagem atual.</p>
+                                    </div>
+
+                                    <div class="form-control">
+                                        <label class="label"><span class="label-text font-bold">Descrição</span></label>
+                                        <textarea name="descricao" class="textarea textarea-bordered h-24" required>{{ prod.descricao }}</textarea>
+                                    </div>
+
+                                    <div class="modal-action">
+                                        <button type="submit" class="btn btn-warning w-full text-white">Salvar Alterações</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <form method="dialog" class="modal-backdrop bg-black/40"><button>close</button></form>
                         </dialog>
                         {% endfor %}
                     </tbody>
@@ -150,49 +192,6 @@
 
                 <div class="modal-action">
                     <button type="submit" class="btn btn-primary w-full text-white">Cadastrar Prêmio</button>
-                </div>
-            </form>
-        </div>
-        <form method="dialog" class="modal-backdrop bg-black/40"><button>close</button></form>
-    </dialog>
-
-    <dialog id="modal_editar_{{ prod.id }}" class="modal">
-        <div class="modal-box max-w-lg border border-amber-200">
-            <form method="dialog"><button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button></form>
-            <h3 class="font-bold text-xl mb-6 text-amber-600 flex items-center gap-2">
-                <i class="fa-solid fa-pen-to-square"></i> Editar Prêmio
-            </h3>
-            
-            <form method="post" action="{{ url_for('editar_produto', id=prod.id) }}" enctype="multipart/form-data" class="space-y-4">
-                <div class="form-control">
-                    <label class="label"><span class="label-text font-bold">Nome do Produto</span></label>
-                    <input type="text" name="nome" value="{{ prod.nome }}" class="input input-bordered w-full" required>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="form-control">
-                        <label class="label"><span class="label-text font-bold">Pontos</span></label>
-                        <input type="number" name="valor_pontos" value="{{ prod.valor_pontos }}" class="input input-bordered w-full" required min="1">
-                    </div>
-                    <div class="form-control">
-                        <label class="label"><span class="label-text font-bold">Categoria</span></label>
-                        <input type="text" name="categoria" value="{{ prod.categoria }}" class="input input-bordered w-full" required>
-                    </div>
-                </div>
-
-                <div class="form-control">
-                    <label class="label"><span class="label-text font-bold">Nova Imagem (Opcional)</span></label>
-                    <input type="file" name="imagem_file" class="file-input file-input-bordered w-full" accept="image/*">
-                    <p class="text-[10px] opacity-50 mt-1 italic">Deixe em branco para manter a imagem atual.</p>
-                </div>
-
-                <div class="form-control">
-                    <label class="label"><span class="label-text font-bold">Descrição</span></label>
-                    <textarea name="descricao" class="textarea textarea-bordered h-24" required>{{ prod.descricao }}</textarea>
-                </div>
-
-                <div class="modal-action">
-                    <button type="submit" class="btn btn-warning w-full text-white">Salvar Alterações</button>
                 </div>
             </form>
         </div>

@@ -22,10 +22,14 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-key")
 db.init_app(app)
 
-# --- Configuração do Flask-Login ---
+## --- Configuração do Flask-Login ---
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
+
+# Adicione estas linhas para traduzir a mensagem:
+login_manager.login_message = "Por favor, faça login para acessar esta página."
+login_manager.login_message_category = "info"
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 

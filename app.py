@@ -257,6 +257,29 @@ def excluir_produto(id):
     flash("Produto removido!", "warning")
     return redirect(url_for("admin_premios"))
 
+@app.route("/admin/premios/editar/<int:id>", methods=["POST"])
+@login_required
+def editar_produto(id):
+    if current_user.role != 'admin': return redirect(url_for("index"))
+    
+    produto = Product.query.get_or_404(id)
+    produto.nome = request.form.get("nome")
+    produto.descricao = request.form.get("descricao")
+    produto.valor_pontos = parse_int(request.form.get("valor_pontos"), 0)
+    produto.categoria = request.form.get("categoria")
+
+    # Verifica se uma nova imagem foi enviada
+    file = request.files.get("imagem_file")
+    if file and allowed_file(file.filename):
+        filename = f"{datetime.now().timestamp()}_{file.filename}"
+        filepath = f"public/{filename}"
+        supabase.storage.from_(bucket_name).upload(filepath, file.read())
+        produto.imagem_url = supabase.storage.from_(bucket_name).get_public_url(filepath)
+
+    db.session.commit()
+    flash(f"Prêmio '{produto.nome}' atualizado com sucesso!", "success")
+    return redirect(url_for("admin_premios"))
+
 # --- Fluxo de Resgates e Ativação ---
 
 @app.route("/ativar_usuario/<int:id>", methods=["POST"])

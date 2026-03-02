@@ -56,71 +56,50 @@
         @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
       </style>
 
-<style>
-    /* ==== DataTables (combina com DaisyUI) ==== */
-  
-    /* container */
-    .dt-container { color: inherit; }
-  
-    /* barra de pesquisa */
-    .dt-search { display:flex; align-items:center; gap:.5rem; }
-    .dt-search label { font-size: .875rem; opacity:.75; }
-    .dt-search input{
-      padding: .45rem .75rem;
-      border-radius: .75rem;
-      border: 1px solid rgba(0,0,0,.12);
-      background: #fff;
-      color: inherit;
-      height: 2.25rem;
-      min-width: 220px;
-      outline: none;
-    }
-    .dt-search input:focus{
-      border-color: rgba(37,99,235,.55);
-      box-shadow: 0 0 0 3px rgba(37,99,235,.18);
-    }
-  
-    /* paginação */
-    .dt-paging { display:flex; align-items:center; gap:.25rem; }
-    .dt-paging-button{
-      padding: .4rem .7rem;
-      border-radius: .75rem;
-      background: #fff;
-      color: #00295d;
-      border: 1px solid rgba(0,0,0,.10);
-      cursor: pointer;
-      user-select: none;
-    }
-    .dt-paging-button:hover{
-      background: rgba(0,0,0,.04);
-    }
-    .dt-paging-button.disabled{
-      opacity:.45;
-      cursor:not-allowed;
-    }
-    .dt-paging-button.current{
-      background: #2563eb;
-      color: #fff;
-      border-color: transparent;
-    }
-  
-    /* info */
-    .dt-info { font-size: .75rem; opacity: .65; }
-  
-    /* botão Exportar (Buttons ext) */
-    .buttons-excel{
-      padding: .45rem .75rem;
-      border-radius: .75rem;
-      background: #22c55e;
-      color: #fff;
-      border: none;
-      cursor: pointer;
-    }
-    .buttons-excel:hover{ filter: brightness(0.95); }
-  
-    /* opcional: melhora tabela */
-    table.dataTable thead th { font-weight: 700; }
-  </style>
+    <style>
+        /* ==== DataTables (combina com DaisyUI) ==== */
+        .dt-container { color: inherit; }
+        .dt-search { display:flex; align-items:center; gap:.5rem; }
+        .dt-search label { font-size: .875rem; opacity:.75; }
+        .dt-search input{
+          padding: .45rem .75rem;
+          border-radius: .75rem;
+          border: 1px solid rgba(0,0,0,.12);
+          background: #fff;
+          color: inherit;
+          height: 2.25rem;
+          min-width: 220px;
+          outline: none;
+        }
+        .dt-search input:focus{
+          border-color: rgba(37,99,235,.55);
+          box-shadow: 0 0 0 3px rgba(37,99,235,.18);
+        }
+        .dt-paging { display:flex; align-items:center; gap:.25rem; }
+        .dt-paging-button{
+          padding: .4rem .7rem;
+          border-radius: .75rem;
+          background: #fff;
+          color: #00295d;
+          border: 1px solid rgba(0,0,0,.10);
+          cursor: pointer;
+          user-select: none;
+        }
+        .dt-paging-button:hover{ background: rgba(0,0,0,.04); }
+        .dt-paging-button.disabled{ opacity:.45; cursor:not-allowed; }
+        .dt-paging-button.current{ background: #2563eb; color: #fff; border-color: transparent; }
+        .dt-info { font-size: .75rem; opacity: .65; }
+        .buttons-excel{
+          padding: .45rem .75rem;
+          border-radius: .75rem;
+          background: #22c55e;
+          color: #fff;
+          border: none;
+          cursor: pointer;
+        }
+        .buttons-excel:hover{ filter: brightness(0.95); }
+        table.dataTable thead th { font-weight: 700; }
+    </style>
       
 </head>
 <body class="min-h-screen bg-base-200 text-base-content font-sans">
@@ -151,6 +130,13 @@
                              <a class="btn btn-ghost btn-sm text-white hover:bg-white/10" href="{{ url_for('catalogo') }}">
                                 <i class="fa-solid fa-store text-blue-200"></i> Ver Catálogo
                             </a>
+                        {% endif %}
+
+                        <a class="btn btn-ghost btn-sm text-white hover:bg-white/10" href="{{ url_for('regulamento') }}">
+                            <i class="fa-solid fa-file-contract text-blue-200"></i> Regulamento
+                        </a>
+
+                        {% if current_user.role == 'admin' %}
                             <div class="dropdown dropdown-hover dropdown-end">
                                 <div tabindex="0" role="button" class="btn btn-warning btn-sm font-bold ml-2">
                                     <i class="fa-solid fa-lock"></i> Painel Admin
@@ -177,6 +163,11 @@
                                 <li class="md:hidden"><a href="{{ url_for('catalogo') }}"><i class="fa-solid fa-gift w-5"></i> Prêmios</a></li>
                             {% elif current_user.role == 'admin' %}
                                 <li class="md:hidden"><a href="{{ url_for('catalogo') }}"><i class="fa-solid fa-store w-5"></i> Ver Catálogo</a></li>
+                            {% endif %}
+                            
+                            <li class="md:hidden"><a href="{{ url_for('regulamento') }}"><i class="fa-solid fa-file-contract w-5"></i> Regulamento</a></li>
+
+                            {% if current_user.role == 'admin' %}
                                 <li class="md:hidden"><a href="{{ url_for('admin_usuarios') }}"><i class="fa-solid fa-users w-5 text-primary"></i> Gerenciar Usuários</a></li>
                                 <li class="md:hidden"><a href="{{ url_for('admin_premios') }}"><i class="fa-solid fa-boxes-stacked w-5 text-primary"></i> Gerenciar Prêmios</a></li>
                             {% endif %}
@@ -199,14 +190,11 @@
 
                 {% else %}
                     <div class="flex gap-2">
+                        <a href="{{ url_for('regulamento') }}" class="btn btn-sm btn-ghost text-white hover:bg-white/10 hidden sm:inline-flex">Regulamento</a>
                         <a href="{{ url_for('login') }}" class="btn btn-sm btn-ghost text-white hover:bg-white/10">Entrar</a>
                         <a href="{{ url_for('register') }}" class="btn btn-sm btn-primary shadow-md border-none">Cadastrar</a>
                     </div>
                 {% endif %}
-
-                <button class="btn btn-ghost btn-circle btn-sm text-white/70 hover:text-white ml-1" onclick="toggleTheme()">
-                    <i class="fa-solid fa-circle-half-stroke"></i>
-                </button>
             </div>
         </div>
     </header>
@@ -227,22 +215,10 @@
 
         {% block content %}{% endblock %}
     </main>
+
     <footer class="p-4 text-center text-slate-400 text-xs">
         &copy; 2026 Novo Mundo das Tintas | <a href="{{ url_for('regulamento') }}" class="hover:text-[#00295d]">Regulamento</a>
     </footer>
 
-    <script>
-        const themeKey = "pf-theme";
-        const root = document.documentElement;
-        const savedTheme = localStorage.getItem(themeKey);
-        if (savedTheme) root.setAttribute("data-theme", savedTheme);
-
-        function toggleTheme() {
-            const current = root.getAttribute("data-theme") || "corporate";
-            const next = current === "corporate" ? "night" : "corporate";
-            root.setAttribute("data-theme", next);
-            localStorage.setItem(themeKey, next);
-        }
-    </script>
 </body>
 </html>

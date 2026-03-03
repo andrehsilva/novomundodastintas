@@ -195,6 +195,7 @@ def admin_editar_usuario(id):
     flash("Dados atualizados!", "success")
     return redirect(url_for("admin_usuarios"))
 
+
 @app.route("/admin/usuarios/deletar/<int:id>", methods=["POST"])
 @login_required
 def admin_deletar_usuario(id):
@@ -208,18 +209,19 @@ def admin_deletar_usuario(id):
         return redirect(url_for("admin_usuarios"))
 
     try:
-        # 1. Remove todas as transações ligadas a este usuário primeiro
+        # Forçamos a deleção de todas as transações vinculadas primeiro
+        # Isso evita que o SQLAlchemy tente apenas "desvincular" (setar NULL) os registros
         Transaction.query.filter_by(user_id=u.id).delete()
         
-        # 2. Agora o usuário pode ser removido sem erro de chave estrangeira
+        # Agora removemos o usuário
         db.session.delete(u)
         db.session.commit()
         
-        flash(f"Usuário {u.nome} e todo o seu histórico foram removidos.", "warning")
+        flash(f"Usuário {u.nome} e todo o seu histórico foram removidos com sucesso.", "warning")
     except Exception as e:
         db.session.rollback()
-        flash("Erro ao excluir: verifique se há outros dados vinculados.", "error")
-        print(f"Erro na exclusão: {e}")
+        print(f"Erro ao deletar: {e}")
+        flash("Ocorreu um erro ao tentar excluir o usuário.", "error")
 
     return redirect(url_for("admin_usuarios"))
 

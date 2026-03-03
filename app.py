@@ -198,14 +198,29 @@ def admin_editar_usuario(id):
 @app.route("/admin/usuarios/deletar/<int:id>", methods=["POST"])
 @login_required
 def admin_deletar_usuario(id):
-    if current_user.role != 'admin': return redirect(url_for("index"))
+    if current_user.role != 'admin': 
+        return redirect(url_for("index"))
+    
     u = User.query.get_or_404(id)
+    
     if u.id == current_user.id:
         flash("Você não pode deletar sua própria conta.", "error")
-    else:
+        return redirect(url_for("admin_usuarios"))
+
+    try:
+        # 1. Remove todas as transações ligadas a este usuário primeiro
+        Transaction.query.filter_by(user_id=u.id).delete()
+        
+        # 2. Agora o usuário pode ser removido sem erro de chave estrangeira
         db.session.delete(u)
         db.session.commit()
-        flash("Usuário removido.", "warning")
+        
+        flash(f"Usuário {u.nome} e todo o seu histórico foram removidos.", "warning")
+    except Exception as e:
+        db.session.rollback()
+        flash("Erro ao excluir: verifique se há outros dados vinculados.", "error")
+        print(f"Erro na exclusão: {e}")
+
     return redirect(url_for("admin_usuarios"))
 
 @app.route("/admin/usuarios/resetar-senha/<int:id>", methods=["POST"])

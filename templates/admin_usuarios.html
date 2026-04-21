@@ -244,19 +244,45 @@
     </dialog>
 
     <dialog id="modal_credito" class="modal">
-        <div class="modal-box max-w-md rounded-3xl">
-            <h3 class="font-bold text-xl mb-6 text-primary">Lançamento de Pontos</h3>
+        <div class="modal-box max-w-md rounded-3xl border-2 border-primary/10 shadow-2xl">
+            <form method="dialog">
+                <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+            </form>
+    
+            <h3 class="font-bold text-xl mb-6 text-primary flex items-center gap-2">
+                <i class="fa-solid fa-coins"></i> Lançamento de Pontos
+            </h3>
+    
             <form method="post" action="{{ url_for('admin_usuarios') }}" class="space-y-4">
                 <input type="hidden" name="acao" value="credito_manual">
-                <select name="user_id" class="select select-bordered w-full" required>
-                    <option value="" disabled selected>Escolha o profissional...</option>
-                    {% for p in pintores %}<option value="{{ p.id }}">{{ p.nome }}</option>{% endfor %}
-                </select>
-                <input type="number" name="pontos" class="input input-bordered w-full" placeholder="Quantidade" required>
-                <input type="text" name="descricao" class="input input-bordered w-full" placeholder="NF ou Motivo" required>
-                <button class="btn btn-primary w-full text-white font-black">Confirmar Lançamento</button>
+                
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-bold opacity-60 text-xs uppercase">Pintor Beneficiado</span></label>
+                    <select name="user_id" class="select select-bordered w-full font-bold" required>
+                        <option value="" disabled selected>Escolha o profissional...</option>
+                        {% for p in pintores %}<option value="{{ p.id }}">{{ p.nome }}</option>{% endfor %}
+                    </select>
+                </div>
+    
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-bold opacity-60 text-xs uppercase">Quantidade</span></label>
+                    <input type="number" name="pontos" class="input input-bordered w-full font-black text-emerald-600" placeholder="0" required min="1">
+                </div>
+    
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-bold opacity-60 text-xs uppercase">NF ou Motivo</span></label>
+                    <input type="text" name="descricao" class="input input-bordered w-full" placeholder="Ex: NF-123 ou Bonificação" required>
+                </div>
+    
+                <div class="modal-action flex flex-col gap-2 mt-6">
+                    <button class="btn btn-primary w-full text-white font-black uppercase tracking-widest">Confirmar Lançamento</button>
+                    <button type="button" onclick="modal_credito.close()" class="btn btn-ghost btn-block text-xs opacity-50">Cancelar e Sair</button>
+                </div>
             </form>
         </div>
+        <form method="dialog" class="modal-backdrop bg-black/40">
+            <button>close</button>
+        </form>
     </dialog>
 </div>
 

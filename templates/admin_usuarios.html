@@ -219,7 +219,7 @@
                             <th>Descrição</th>
                             <th class="text-center">Status</th>
                             <th class="text-right">Pontos</th>
-                        </tr>
+                            <th class="text-center">Ações</th> </tr>
                     </thead>
                     <tbody class="text-slate-600">
                         {% for t in p.transacoes | sort(attribute='data', reverse=True) %}
@@ -237,6 +237,13 @@
                             </td>
                             <td class="text-right font-black text-base {{ 'text-emerald-500' if t.pontos > 0 else 'text-rose-500' }}">
                                 {{ '+' if t.pontos > 0 }}{{ t.pontos }}
+                            </td>
+                            <td class="text-center"> {% if t.pontos > 0 %}
+                                <button onclick="document.getElementById('modal_edit_transacao_{{ t.id }}').showModal()" 
+                                        class="btn btn-ghost btn-xs text-amber-600 hover:bg-amber-50" title="Editar este lançamento">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}

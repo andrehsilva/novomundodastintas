@@ -149,8 +149,9 @@ def admin_usuarios():
                 flash(f"Pontos creditados para {alvo.nome}!", "success")
         return redirect(url_for("admin_usuarios"))
 
-    pintores = User.query.filter_by(role='pintor', ativo=True).all()
-    pendentes = User.query.filter_by(role='pintor', ativo=False).all()
+    # AJUSTE: Ordenação Alfabética por Nome
+    pintores = User.query.filter_by(role='pintor', ativo=True).order_by(User.nome.asc()).all()
+    pendentes = User.query.filter_by(role='pintor', ativo=False).order_by(User.nome.asc()).all()
     transacoes = Transaction.query.order_by(Transaction.data.desc()).all()
     return render_template("admin_usuarios.html", pintores=pintores, pintores_pendentes=pendentes, transacoes_todas=transacoes)
 

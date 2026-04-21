@@ -19,46 +19,105 @@
     <script src="https://cdn.datatables.net/buttons/3.0.0/js/buttons.html5.min.js"></script>
     
     <style>
-        /* Estabilização para evitar quebra de layout ao carregar */
-        .dt-container { color: #1f2937; width: 100% !important; }
-        table:not(.dataTable) { visibility: hidden; height: 0; overflow: hidden; }
-
-        /* Ajustes de UI para o tema Corporate */
+        /* ==== Ajuste DataTables para Tema Claro (Corporate) ==== */
+        .dt-container { color: #1f2937; } /* Cor do texto cinza escuro */
+        
         .dt-search input {
-            padding: .45rem .75rem;
-            border-radius: .75rem;
-            border: 1px solid #d1d5db;
-            background: #ffffff !important;
-            color: #1f2937 !important;
-            height: 2.25rem;
-            outline: none;
+        padding: .45rem .75rem;
+        border-radius: .75rem;
+        border: 1px solid #d1d5db;
+        background: #ffffff !important; /* Força fundo branco */
+        color: #1f2937 !important;
+        height: 2.25rem;
+        outline: none;
         }
 
+        /* Ajuste dos botões de paginação para não ficarem pretos */
         .dt-paging-button {
-            padding: .4rem .7rem;
-            border-radius: .75rem;
-            background: #ffffff !important;
-            color: #00295d !important;
-            border: 1px solid #e5e7eb !important;
-            cursor: pointer;
-            margin: 0 2px;
+        padding: .4rem .7rem;
+        border-radius: .75rem;
+        background: #ffffff !important;
+        color: #00295d !important;
+        border: 1px solid #e5e7eb !important;
+        cursor: pointer;
         }
 
         .dt-paging-button.current {
-            background: #00295d !important;
-            color: #ffffff !important;
-            border-color: transparent !important;
+        background: #00295d !important; /* Azul da marca no botão ativo */
+        color: #ffffff !important;
+        border-color: transparent !important;
         }
 
+        .dt-paging-button:hover:not(.current) {
+        background: #f3f4f6 !important;
+        }
+
+        .dt-info { font-size: .75rem; color: #6b7280; }
+
+        /* Botão de Exportar Excel */
         .buttons-excel {
-            background: #22c55e !important;
-            color: white !important;
-            border: none !important;
-            padding: 0.5rem 1rem !important;
-            border-radius: 0.5rem !important;
-            font-weight: bold;
+        background: #22c55e !important;
+        color: white !important;
+        border: none !important;
+        padding: 0.5rem 1rem !important;
+        border-radius: 0.5rem !important;
+        font-weight: bold;
         }
     </style>
+
+    <style>
+        /* ==== DataTables (combina com DaisyUI) ==== */
+        .dt-container { color: inherit; }
+        .dt-search { display:flex; align-items:center; gap:.5rem; }
+        .dt-search label { font-size: .875rem; opacity:.75; }
+        .dt-search input{
+          padding: .45rem .75rem;
+          border-radius: .75rem;
+          border: 1px solid rgba(0,0,0,.12);
+          background: #fff;
+          color: inherit;
+          height: 2.25rem;
+          min-width: 220px;
+          outline: none;
+        }
+        .dt-search input:focus{
+          border-color: rgba(37,99,235,.55);
+          box-shadow: 0 0 0 3px rgba(37,99,235,.18);
+        }
+        .dt-paging { display:flex; align-items:center; gap:.25rem; }
+        .dt-paging-button{
+          padding: .4rem .7rem;
+          border-radius: .75rem;
+          background: #fff;
+          color: #00295d;
+          border: 1px solid rgba(0,0,0,.10);
+          cursor: pointer;
+          user-select: none;
+        }
+        .dt-paging-button:hover{ background: rgba(0,0,0,.04); }
+        .dt-paging-button.disabled{ opacity:.45; cursor:not-allowed; }
+        .dt-paging-button.current{ background: #2563eb; color: #fff; border-color: transparent; }
+        .dt-info { font-size: .75rem; opacity: .65; }
+        .buttons-excel{
+          padding: .45rem .75rem;
+          border-radius: .75rem;
+          background: #22c55e;
+          color: #fff;
+          border: none;
+          cursor: pointer;
+        }
+        .buttons-excel:hover{ filter: brightness(0.95); }
+        table.dataTable thead th { font-weight: 700; }
+    </style>
+    <style>
+        /* Força a tabela a respeitar o limite da tela enquanto o JS não carrega */
+        .dt-container { width: 100% !important; overflow-x: auto; }
+        table { width: 100% !important; }
+        
+        /* Evita que os botões do DataTables fiquem colados no topo */
+        .dt-buttons { margin-bottom: 1rem; }
+    </style>
+      
 </head>
 <body class="min-h-screen bg-base-200 text-base-content font-sans">
 
@@ -88,6 +147,13 @@
                              <a class="btn btn-ghost btn-sm text-white hover:bg-white/10" href="{{ url_for('catalogo') }}">
                                 <i class="fa-solid fa-store text-blue-200"></i> Ver Catálogo
                             </a>
+                        {% endif %}
+
+                        <a class="btn btn-ghost btn-sm text-white hover:bg-white/10" href="{{ url_for('regulamento') }}">
+                            <i class="fa-solid fa-file-contract text-blue-200"></i> Regulamento
+                        </a>
+
+                        {% if current_user.role == 'admin' %}
                             <div class="dropdown dropdown-hover dropdown-end">
                                 <div tabindex="0" role="button" class="btn btn-warning btn-sm font-bold ml-2">
                                     <i class="fa-solid fa-lock"></i> Painel Admin
@@ -98,10 +164,6 @@
                                 </ul>
                             </div>
                         {% endif %}
-
-                        <a class="btn btn-ghost btn-sm text-white hover:bg-white/10" href="{{ url_for('regulamento') }}">
-                            <i class="fa-solid fa-file-contract text-blue-200"></i> Regulamento
-                        </a>
                     </nav>
 
                     <div class="dropdown dropdown-end">
@@ -118,12 +180,16 @@
                                 <li class="md:hidden"><a href="{{ url_for('catalogo') }}"><i class="fa-solid fa-gift w-5"></i> Prêmios</a></li>
                             {% elif current_user.role == 'admin' %}
                                 <li class="md:hidden"><a href="{{ url_for('catalogo') }}"><i class="fa-solid fa-store w-5"></i> Ver Catálogo</a></li>
+                            {% endif %}
+                            
+                            <li class="md:hidden"><a href="{{ url_for('regulamento') }}"><i class="fa-solid fa-file-contract w-5"></i> Regulamento</a></li>
+
+                            {% if current_user.role == 'admin' %}
                                 <li class="md:hidden"><a href="{{ url_for('admin_usuarios') }}"><i class="fa-solid fa-users w-5 text-primary"></i> Gerenciar Usuários</a></li>
                                 <li class="md:hidden"><a href="{{ url_for('admin_premios') }}"><i class="fa-solid fa-boxes-stacked w-5 text-primary"></i> Gerenciar Prêmios</a></li>
                             {% endif %}
-                            <li class="md:hidden"><a href="{{ url_for('regulamento') }}"><i class="fa-solid fa-file-contract w-5"></i> Regulamento</a></li>
                             
-                            <div class="divider my-0"></div>
+                            <div class="divider md:hidden my-0"></div>
 
                             <li class="menu-title text-xs opacity-50 uppercase">Minha Conta</li>
                             {% if current_user.role == 'pintor' %}
@@ -141,7 +207,8 @@
 
                 {% else %}
                     <div class="flex gap-2">
-                        <a href="{{ url_for('login') }}" class="btn btn-sm btn-ghost text-white">Entrar</a>
+                        <a href="{{ url_for('regulamento') }}" class="btn btn-sm btn-ghost text-white hover:bg-white/10 hidden sm:inline-flex">Regulamento</a>
+                        <a href="{{ url_for('login') }}" class="btn btn-sm btn-ghost text-white hover:bg-white/10">Entrar</a>
                         <a href="{{ url_for('register') }}" class="btn btn-sm btn-primary shadow-md border-none">Cadastrar</a>
                     </div>
                 {% endif %}
@@ -154,7 +221,7 @@
             {% if messages %}
                 <div class="max-w-md mx-auto">
                     {% for category, message in messages %}
-                        <div class="alert mb-4 shadow-lg {{ 'alert-success' if category == 'success' else 'alert-warning' if category == 'warning' else 'alert-error' if category == 'error' else 'alert-info' }}">
+                        <div class="alert mb-4 shadow-lg animate-toast {{ 'alert-success' if category == 'success' else 'alert-warning' if category == 'warning' else 'alert-error' if category == 'error' else 'alert-info' }}">
                             <i class="fa-solid {{ 'fa-check-circle' if category == 'success' else 'fa-exclamation-triangle' if category == 'warning' else 'fa-circle-xmark' }}"></i>
                             <span>{{ message }}</span>
                         </div>

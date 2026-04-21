@@ -80,7 +80,6 @@
 
     <div class="card bg-white shadow-xl border border-base-300 rounded-2xl overflow-hidden">
         <div class="card-body p-6">
-            
             <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
                 <div class="relative w-full md:w-96">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 opacity-50">
@@ -90,7 +89,6 @@
                            placeholder="Buscar por nome, telefone ou CPF..." 
                            class="input input-bordered w-full pl-10 rounded-xl focus:border-[#00295d]">
                 </div>
-                
                 <button onclick="gerarExcelPintores()" class="btn btn-success text-white font-bold rounded-xl shadow-md border-none">
                     <i class="fa-solid fa-file-excel mr-2"></i> Exportar Excel
                 </button>
@@ -120,10 +118,10 @@
                             <td><div class="badge badge-neutral font-black px-4">{{ p.saldo_total }}</div></td>
                             <td class="text-center">
                                 <div class="flex justify-center gap-1">
-                                    <button onclick="document.getElementById('modal_log_{{ p.id }}').showModal()" class="btn btn-circle btn-sm bg-blue-50 border-none text-blue-600 hover:bg-blue-100 shadow-sm"><i class="fa-solid fa-clock-rotate-left"></i></button>
-                                    <button onclick="document.getElementById('modal_edit_{{ p.id }}').showModal()" class="btn btn-circle btn-sm bg-amber-50 border-none text-amber-600 hover:bg-amber-100 shadow-sm"><i class="fa-solid fa-pen"></i></button>
-                                    <button onclick="document.getElementById('modal_reset_{{ p.id }}').showModal()" class="btn btn-circle btn-sm bg-orange-50 border-none text-orange-600 hover:bg-orange-100 shadow-sm"><i class="fa-solid fa-key"></i></button>
-                                    <button onclick="document.getElementById('modal_del_{{ p.id }}').showModal()" class="btn btn-circle btn-sm bg-rose-50 border-none text-rose-600 hover:bg-rose-100 shadow-sm"><i class="fa-solid fa-trash"></i></button>
+                                    <button onclick="document.getElementById('modal_log_{{ p.id }}').showModal()" class="btn btn-circle btn-sm bg-blue-50 border-none text-blue-600 hover:bg-blue-100 shadow-sm" title="Histórico"><i class="fa-solid fa-clock-rotate-left"></i></button>
+                                    <button onclick="document.getElementById('modal_edit_{{ p.id }}').showModal()" class="btn btn-circle btn-sm bg-amber-50 border-none text-amber-600 hover:bg-amber-100 shadow-sm" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                                    <button onclick="document.getElementById('modal_reset_{{ p.id }}').showModal()" class="btn btn-circle btn-sm bg-orange-50 border-none text-orange-600 hover:bg-orange-100 shadow-sm" title="Resetar Senha"><i class="fa-solid fa-key"></i></button>
+                                    <button onclick="document.getElementById('modal_del_{{ p.id }}').showModal()" class="btn btn-circle btn-sm bg-rose-50 border-none text-rose-600 hover:bg-rose-100 shadow-sm" title="Excluir"><i class="fa-solid fa-trash"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -135,154 +133,127 @@
     </div>
 
     {% for p in pintores %}
-    <dialog id="modal_log_{{ p.id }}" class="modal">
-        <div class="modal-box w-11/12 max-w-4xl p-0 overflow-hidden rounded-3xl border border-base-300">
-            <div class="bg-[#00295d] p-6 flex justify-between items-center text-white">
-                <div>
-                    <h3 class="font-black text-xl">Extrato Detalhado</h3>
-                    <p class="text-xs opacity-70">Profissional: {{ p.nome }}</p>
+        <dialog id="modal_log_{{ p.id }}" class="modal">
+            <div class="modal-box w-11/12 max-w-4xl p-0 overflow-hidden rounded-3xl border border-base-300">
+                <div class="bg-[#00295d] p-6 flex justify-between items-center text-white">
+                    <div><h3 class="font-black text-xl">Extrato Detalhado</h3><p class="text-xs opacity-70">Profissional: {{ p.nome }}</p></div>
+                    <form method="dialog"><button class="btn btn-sm btn-circle btn-ghost text-white">✕</button></form>
                 </div>
-                <form method="dialog"><button class="btn btn-sm btn-circle btn-ghost text-white">✕</button></form>
+                <div class="p-8 overflow-x-auto">
+                    <table class="table table-sm w-full">
+                        <thead><tr class="text-[#00295d] uppercase text-[10px]"><th>Data</th><th>Descrição</th><th class="text-center">Status</th><th class="text-right">Pontos</th><th class="text-center">Ações</th></tr></thead>
+                        <tbody>
+                            {% for t in p.transacoes | sort(attribute='data', reverse=True) %}
+                            <tr>
+                                <td>{{ t.data.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td class="font-bold">{{ t.descricao }}</td>
+                                <td class="text-center"><span class="badge badge-xs p-2 font-black uppercase text-[9px] {{ 'bg-emerald-100 text-emerald-700' if t.status == 'entregue' else 'bg-blue-100 text-blue-700' if t.status == 'concluido' else 'bg-amber-100 text-amber-700' if t.status == 'pendente' else 'bg-rose-100 text-rose-700' }}">{{ t.status }}</span></td>
+                                <td class="text-right font-black {{ 'text-emerald-500' if t.pontos > 0 else 'text-rose-500' }}">{{ '+' if t.pontos > 0 }}{{ t.pontos }}</td>
+                                <td class="text-center">{% if t.pontos > 0 %}<button onclick="document.getElementById('modal_edit_transacao_{{ t.id }}').showModal()" class="btn btn-ghost btn-xs text-amber-600"><i class="fa-solid fa-pen-to-square"></i></button>{% endif %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <div class="p-8 overflow-x-auto">
-                <table class="table table-sm w-full">
-                    <thead>
-                        <tr class="text-[#00295d] uppercase text-[10px]">
-                            <th>Data</th>
-                            <th>Descrição</th>
-                            <th class="text-center">Status</th>
-                            <th class="text-right">Pontos</th>
-                            <th class="text-center">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for t in p.transacoes | sort(attribute='data', reverse=True) %}
-                        <tr>
-                            <td>{{ t.data.strftime('%d/%m/%Y %H:%M') }}</td>
-                            <td class="font-bold">{{ t.descricao }}</td>
-                            <td class="text-center">
-                                <span class="badge badge-xs p-2 font-black uppercase text-[9px]
-                                    {{ 'bg-emerald-100 text-emerald-700' if t.status == 'entregue' }}
-                                    {{ 'bg-blue-100 text-blue-700' if t.status == 'concluido' }}
-                                    {{ 'bg-amber-100 text-amber-700' if t.status == 'pendente' }}
-                                    {{ 'bg-rose-100 text-rose-700' if t.status == 'reprovado' }}">
-                                    {{ t.status }}
-                                </span>
-                            </td>
-                            <td class="text-right font-black {{ 'text-emerald-500' if t.pontos > 0 else 'text-rose-500' }}">
-                                {{ '+' if t.pontos > 0 }}{{ t.pontos }}
-                            </td>
-                            <td class="text-center">
-                                {% if t.pontos > 0 %}
-                                <button onclick="document.getElementById('modal_edit_transacao_{{ t.id }}').showModal()" class="btn btn-ghost btn-xs text-amber-600"><i class="fa-solid fa-pen-to-square"></i></button>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <form method="dialog" class="modal-backdrop bg-black/40"><button>close</button></form>
+        </dialog>
+
+        <dialog id="modal_edit_{{ p.id }}" class="modal">
+            <div class="modal-box max-w-md rounded-3xl shadow-2xl">
+                <form method="dialog"><button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button></form>
+                <h3 class="font-black text-xl mb-6 text-amber-600">Editar Cadastro</h3>
+                <form action="{{ url_for('admin_editar_usuario', id=p.id) }}" method="POST" class="space-y-4">
+                    <input type="text" name="nome" class="input input-bordered w-full font-bold" value="{{ p.nome }}" required>
+                    <input type="text" name="telefone" class="input input-bordered w-full font-mono telefone-mask" value="{{ p.telefone }}" required>
+                    <input type="email" name="email" class="input input-bordered w-full" value="{{ p.email or '' }}" placeholder="E-mail">
+                    <input type="text" name="cpf_cnpj" class="input input-bordered w-full font-mono" value="{{ p.cpf_cnpj or '' }}" placeholder="CPF/CNPJ">
+                    <input type="text" name="senha" class="input input-bordered w-full" placeholder="Alterar senha (opcional)">
+                    <button class="btn btn-warning w-full text-white font-black uppercase">Salvar Alterações</button>
+                </form>
             </div>
-        </div>
-        <form method="dialog" class="modal-backdrop bg-black/40"><button>close</button></form>
-    </dialog>
+            <form method="dialog" class="modal-backdrop bg-black/40"><button>close</button></form>
+        </dialog>
 
-    <dialog id="modal_edit_{{ p.id }}" class="modal">
-        <div class="modal-box max-w-md rounded-3xl">
-          <h3 class="font-black text-xl mb-6 text-amber-600">Editar Cadastro: {{ p.nome }}</h3>
-          <form action="{{ url_for('admin_editar_usuario', id=p.id) }}" method="POST" class="space-y-4">
-            <input type="text" name="nome" class="input input-bordered w-full font-bold" value="{{ p.nome }}" required>
-            <input type="text" name="telefone" class="input input-bordered w-full font-mono telefone-mask" value="{{ p.telefone }}" required>
-            <input type="email" name="email" class="input input-bordered w-full" value="{{ p.email or '' }}" placeholder="E-mail">
-            <input type="text" name="cpf_cnpj" class="input input-bordered w-full font-mono" value="{{ p.cpf_cnpj or '' }}" placeholder="CPF/CNPJ">
-            <input type="text" name="senha" class="input input-bordered w-full" placeholder="Nova senha (opcional)">
-            <button class="btn btn-warning w-full text-white font-black uppercase shadow-lg">Salvar Alterações</button>
-          </form>
-          <form method="dialog" class="mt-4"><button class="btn btn-sm btn-ghost w-full">Cancelar</button></form>
-        </div>
-        <form method="dialog" class="modal-backdrop bg-black/40"><button>close</button></form>
-    </dialog>
+        <dialog id="modal_reset_{{ p.id }}" class="modal">
+            <div class="modal-box max-w-sm rounded-3xl border-2 border-warning/10 shadow-2xl">
+                <form method="dialog"><button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button></form>
+                <h3 class="font-black text-lg mb-4 text-[#00295d]">Resetar Senha: {{ p.nome }}</h3>
+                <form action="{{ url_for('admin_resetar_senha', id=p.id) }}" method="POST" class="space-y-4">
+                    <input type="text" name="nova_senha" placeholder="Nova senha temporária" class="input input-bordered w-full font-bold text-center" required>
+                    <button class="btn btn-warning w-full text-white font-black">Confirmar Reset</button>
+                </form>
+            </div>
+            <form method="dialog" class="modal-backdrop bg-black/40"><button>close</button></form>
+        </dialog>
 
-    {% for t in p.transacoes %}
-    <dialog id="modal_edit_transacao_{{ t.id }}" class="modal">
-        <div class="modal-box max-w-sm rounded-3xl border-2 border-amber-100">
-            <h3 class="font-black text-lg mb-4 text-amber-600">Editar Pontos</h3>
-            <form action="{{ url_for('admin_editar_transacao', id=t.id) }}" method="POST" class="space-y-4">
-                <input type="number" name="pontos" class="input input-bordered w-full font-bold" value="{{ t.pontos }}" required>
-                <input type="text" name="descricao" class="input input-bordered w-full" value="{{ t.descricao }}" required>
-                <button class="btn btn-warning w-full text-white font-black">Salvar Alteração</button>
-            </form>
-            <form method="dialog" class="mt-2"><button class="btn btn-sm btn-ghost w-full">Sair</button></form>
-        </div>
-        <form method="dialog" class="modal-backdrop bg-black/40"><button>close</button></form>
-    </dialog>
-    {% endfor %}
+        {% for t in p.transacoes %}
+        <dialog id="modal_edit_transacao_{{ t.id }}" class="modal">
+            <div class="modal-box max-w-sm rounded-3xl border-2 border-amber-100">
+                <form method="dialog"><button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button></form>
+                <h3 class="font-black text-lg mb-4 text-amber-600 text-center">Ajustar Lançamento</h3>
+                <form action="{{ url_for('admin_editar_transacao', id=t.id) }}" method="POST" class="space-y-4">
+                    <input type="number" name="pontos" class="input input-bordered w-full font-bold text-center" value="{{ t.pontos }}" required>
+                    <input type="text" name="descricao" class="input input-bordered w-full" value="{{ t.descricao }}" required>
+                    <button class="btn btn-warning w-full text-white font-black">Salvar Ajuste</button>
+                </form>
+            </div>
+            <form method="dialog" class="modal-backdrop bg-black/40"><button>close</button></form>
+        </dialog>
+        {% endfor %}
 
-    <dialog id="modal_del_{{ p.id }}" class="modal">
-        <div class="modal-box max-w-sm rounded-3xl border-2 border-rose-200 p-8 text-center">
-            <h3 class="font-black text-xl mb-4 text-rose-600">Remover Pintor?</h3>
-            <p class="text-sm mb-8">O histórico de <b>{{ p.nome }}</b> será perdido.</p>
-            <form action="{{ url_for('admin_deletar_usuario', id=p.id) }}" method="POST">
-                <button class="btn btn-error w-full text-white font-black">Sim, Remover</button>
-            </form>
-            <form method="dialog" class="mt-2"><button class="btn btn-ghost btn-block">Cancelar</button></form>
-        </div>
-    </dialog>
+        <dialog id="modal_del_{{ p.id }}" class="modal">
+            <div class="modal-box max-w-sm rounded-3xl border-2 border-rose-200 text-center">
+                <h3 class="font-black text-xl mb-4 text-rose-600">Remover Pintor?</h3>
+                <p class="text-sm mb-6">O histórico de <b>{{ p.nome }}</b> será apagado para sempre.</p>
+                <div class="flex flex-col gap-2">
+                    <form action="{{ url_for('admin_deletar_usuario', id=p.id) }}" method="POST">
+                        <button class="btn btn-error w-full text-white font-black uppercase">Sim, Excluir</button>
+                    </form>
+                    <form method="dialog"><button class="btn btn-ghost btn-block">Cancelar</button></form>
+                </div>
+            </div>
+            <form method="dialog" class="modal-backdrop bg-black/40"><button>close</button></form>
+        </dialog>
     {% endfor %}
 
     <dialog id="modal_novo_usuario" class="modal">
         <div class="modal-box max-w-md rounded-3xl">
-            <h3 class="font-bold text-xl mb-6 text-primary">Novo Profissional</h3>
+            <form method="dialog"><button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button></form>
+            <h3 class="font-bold text-xl mb-6 text-primary uppercase">Novo Profissional</h3>
             <form method="post" action="{{ url_for('admin_novo_usuario') }}" class="space-y-4">
                 <input type="text" name="nome" placeholder="Nome Completo" class="input input-bordered w-full" required>
                 <input type="text" name="telefone" id="reg_telefone" placeholder="Telefone" class="input input-bordered w-full" required>
                 <input type="text" name="cpf_cnpj" placeholder="CPF ou CNPJ" class="input input-bordered w-full" required>
                 <input type="password" name="senha" placeholder="Senha Inicial" class="input input-bordered w-full" required>
-                <button type="submit" class="btn btn-primary w-full text-white font-black">Criar Conta</button>
+                <button type="submit" class="btn btn-primary w-full text-white font-black">CADASTRAR E ATIVAR</button>
             </form>
-            <form method="dialog" class="mt-4"><button class="btn btn-ghost btn-block btn-sm">Sair</button></form>
         </div>
+        <form method="dialog" class="modal-backdrop bg-black/40"><button>close</button></form>
     </dialog>
 
     <dialog id="modal_credito" class="modal">
         <div class="modal-box max-w-md rounded-3xl border-2 border-primary/10 shadow-2xl">
-            <form method="dialog">
-                <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-            </form>
-    
-            <h3 class="font-bold text-xl mb-6 text-primary flex items-center gap-2">
-                <i class="fa-solid fa-coins"></i> Lançamento de Pontos
-            </h3>
-    
+            <form method="dialog"><button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button></form>
+            <h3 class="font-bold text-xl mb-6 text-primary flex items-center gap-2"><i class="fa-solid fa-coins"></i> Lançamento de Pontos</h3>
             <form method="post" action="{{ url_for('admin_usuarios') }}" class="space-y-4">
                 <input type="hidden" name="acao" value="credito_manual">
-                
-                <div class="form-control">
-                    <label class="label"><span class="label-text font-bold opacity-60 text-xs uppercase">Pintor Beneficiado</span></label>
-                    <select name="user_id" class="select select-bordered w-full font-bold" required>
-                        <option value="" disabled selected>Escolha o profissional...</option>
-                        {% for p in pintores %}<option value="{{ p.id }}">{{ p.nome }}</option>{% endfor %}
-                    </select>
-                </div>
-    
-                <div class="form-control">
-                    <label class="label"><span class="label-text font-bold opacity-60 text-xs uppercase">Quantidade</span></label>
-                    <input type="number" name="pontos" class="input input-bordered w-full font-black text-emerald-600" placeholder="0" required min="1">
-                </div>
-    
-                <div class="form-control">
-                    <label class="label"><span class="label-text font-bold opacity-60 text-xs uppercase">NF ou Motivo</span></label>
-                    <input type="text" name="descricao" class="input input-bordered w-full" placeholder="Ex: NF-123 ou Bonificação" required>
-                </div>
-    
+                <div class="form-control"><label class="label"><span class="label-text font-bold opacity-60 text-xs uppercase">Pintor Beneficiado</span></label>
+                <select name="user_id" class="select select-bordered w-full font-bold" required>
+                    <option value="" disabled selected>Escolha o profissional...</option>
+                    {% for p in pintores %}<option value="{{ p.id }}">{{ p.nome }}</option>{% endfor %}
+                </select></div>
+                <div class="form-control"><label class="label"><span class="label-text font-bold opacity-60 text-xs uppercase">Quantidade</span></label>
+                <input type="number" name="pontos" class="input input-bordered w-full font-black text-emerald-600" placeholder="0" required min="1"></div>
+                <div class="form-control"><label class="label"><span class="label-text font-bold opacity-60 text-xs uppercase">NF ou Motivo</span></label>
+                <input type="text" name="descricao" class="input input-bordered w-full" placeholder="Ex: NF-123" required></div>
                 <div class="modal-action flex flex-col gap-2 mt-6">
-                    <button class="btn btn-primary w-full text-white font-black uppercase tracking-widest">Confirmar Lançamento</button>
-                    <button type="button" onclick="modal_credito.close()" class="btn btn-ghost btn-block text-xs opacity-50">Cancelar e Sair</button>
+                    <button class="btn btn-primary w-full text-white font-black uppercase">Confirmar Lançamento</button>
+                    <button type="button" onclick="modal_credito.close()" class="btn btn-ghost btn-block text-xs opacity-50">Cancelar</button>
                 </div>
             </form>
         </div>
-        <form method="dialog" class="modal-backdrop bg-black/40">
-            <button>close</button>
-        </form>
+        <form method="dialog" class="modal-backdrop bg-black/40"><button>close</button></form>
     </dialog>
 </div>
 
@@ -291,10 +262,8 @@
 
 <script>
 $(document).ready(function() {
-    // Máscaras
     $('#reg_telefone, .telefone-mask').mask('(00) 00000-0000');
 
-    // FILTRO DE BUSCA INSTANTÂNEO (SEM LENTIDÃO)
     $("#filtroPintores").on("keyup", function() {
         var value = $(this).val().toLowerCase();
         $("#listaPintores tr").filter(function() {
@@ -303,7 +272,6 @@ $(document).ready(function() {
     });
 });
 
-// GERA EXCEL SEM PRECISAR DO DATATABLES
 function gerarExcelPintores() {
     const table = document.getElementById("tabelaDados");
     const wb = XLSX.utils.table_to_book(table, {sheet: "Pintores"});

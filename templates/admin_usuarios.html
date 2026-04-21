@@ -108,27 +108,22 @@
                                         class="btn btn-circle btn-sm bg-blue-50 border-none text-blue-600 hover:bg-blue-100 shadow-sm" title="Ver Histórico">
                                     <i class="fa-solid fa-clock-rotate-left"></i>
                                 </button>
+                                
                                 <button onclick="document.getElementById('modal_edit_{{ p.id }}').showModal()" 
                                         class="btn btn-circle btn-sm bg-amber-50 border-none text-amber-600 hover:bg-amber-100 shadow-sm" title="Editar Dados">
                                     <i class="fa-solid fa-pen"></i>
                                 </button>
+                                
                                 <button onclick="document.getElementById('modal_reset_{{ p.id }}').showModal()" 
                                         class="btn btn-circle btn-sm bg-orange-50 border-none text-orange-600 hover:bg-orange-100 shadow-sm" title="Resetar Senha">
                                     <i class="fa-solid fa-key"></i>
                                 </button>
+                                
                                 <button onclick="document.getElementById('modal_del_{{ p.id }}').showModal()" 
                                         class="btn btn-circle btn-sm bg-rose-50 border-none text-rose-600 hover:bg-rose-100 shadow-sm" title="Excluir Usuário">
                                     <i class="fa-solid fa-trash"></i>
                                 </button>
                             </div>
-                        </td>
-                        <td>
-                            {% if t.pontos > 0 %} {# Geralmente editamos apenas créditos manuais #}
-                            <button onclick="document.getElementById('modal_edit_transacao_{{ t.id }}').showModal()" 
-                                    class="btn btn-ghost btn-xs text-amber-600">
-                                <i class="fa-solid fa-pen-to-square"></i>
-                            </button>
-                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}

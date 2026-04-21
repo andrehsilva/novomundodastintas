@@ -237,6 +237,30 @@ def admin_resetar_senha(id):
         flash(f"Senha de {user.nome} alterada com sucesso!", "success")
     return redirect(url_for("admin_usuarios"))
 
+
+@app.route("/admin/transacao/editar/<int:id>", methods=["POST"])
+@login_required
+def admin_editar_transacao(id):
+    if current_user.role != 'admin': 
+        return redirect(url_for("index"))
+    
+    t = Transaction.query.get_or_404(id)
+    user = User.query.get(t.user_id)
+    
+    novo_valor = parse_int(request.form.get("pontos"), 0)
+    nova_descricao = request.form.get("descricao")
+
+    # Calcula a diferença para ajustar o saldo do usuário
+    # Se era 100 e mudei para 120, a diferença é +20
+    diferenca = novo_valor - t.pontos
+    
+    t.pontos = novo_valor
+    t.descricao = nova_descricao
+    user.saldo_total += diferenca
+    
+    db.session.commit()
+    flash("Lançamento atualizado com sucesso!", "success")
+    return redirect(url_for("admin_usuarios"))
 # --- Gestão de Prêmios ---
 
 @app.route("/admin/premios", methods=["GET", "POST"])

@@ -122,6 +122,14 @@
                                 </button>
                             </div>
                         </td>
+                        <td>
+                            {% if t.pontos > 0 %} {# Geralmente editamos apenas créditos manuais #}
+                            <button onclick="document.getElementById('modal_edit_transacao_{{ t.id }}').showModal()" 
+                                    class="btn btn-ghost btn-xs text-amber-600">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            {% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

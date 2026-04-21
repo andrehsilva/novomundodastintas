@@ -19,103 +19,43 @@
     <script src="https://cdn.datatables.net/buttons/3.0.0/js/buttons.html5.min.js"></script>
     
     <style>
-        /* ==== Ajuste DataTables para Tema Claro (Corporate) ==== */
-        .dt-container { color: #1f2937; } /* Cor do texto cinza escuro */
+        /* Estabilização Unificada DataTables + DaisyUI */
+        .dt-container { color: #1f2937; width: 100% !important; }
+        table { width: 100% !important; border-collapse: collapse !important; }
         
+        /* Estilo dos Inputs de Busca */
         .dt-search input {
-        padding: .45rem .75rem;
-        border-radius: .75rem;
-        border: 1px solid #d1d5db;
-        background: #ffffff !important; /* Força fundo branco */
-        color: #1f2937 !important;
-        height: 2.25rem;
-        outline: none;
+            padding: .45rem .75rem;
+            border-radius: .75rem;
+            border: 1px solid #d1d5db;
+            background: #ffffff !important;
+            color: #1f2937 !important;
+            outline: none;
         }
-
-        /* Ajuste dos botões de paginação para não ficarem pretos */
+    
+        /* Estilo da Paginação */
         .dt-paging-button {
-        padding: .4rem .7rem;
-        border-radius: .75rem;
-        background: #ffffff !important;
-        color: #00295d !important;
-        border: 1px solid #e5e7eb !important;
-        cursor: pointer;
+            padding: .4rem .7rem;
+            border-radius: .75rem;
+            background: #ffffff !important;
+            color: #00295d !important;
+            border: 1px solid #e5e7eb !important;
+            margin: 0 2px;
         }
-
+    
         .dt-paging-button.current {
-        background: #00295d !important; /* Azul da marca no botão ativo */
-        color: #ffffff !important;
-        border-color: transparent !important;
+            background: #00295d !important;
+            color: #ffffff !important;
         }
-
-        .dt-paging-button:hover:not(.current) {
-        background: #f3f4f6 !important;
-        }
-
-        .dt-info { font-size: .75rem; color: #6b7280; }
-
-        /* Botão de Exportar Excel */
+    
         .buttons-excel {
-        background: #22c55e !important;
-        color: white !important;
-        border: none !important;
-        padding: 0.5rem 1rem !important;
-        border-radius: 0.5rem !important;
-        font-weight: bold;
+            background: #22c55e !important;
+            color: white !important;
+            padding: 0.5rem 1rem !important;
+            border-radius: 0.5rem !important;
+            font-weight: bold;
+            border: none;
         }
-    </style>
-
-    <style>
-        /* ==== DataTables (combina com DaisyUI) ==== */
-        .dt-container { color: inherit; }
-        .dt-search { display:flex; align-items:center; gap:.5rem; }
-        .dt-search label { font-size: .875rem; opacity:.75; }
-        .dt-search input{
-          padding: .45rem .75rem;
-          border-radius: .75rem;
-          border: 1px solid rgba(0,0,0,.12);
-          background: #fff;
-          color: inherit;
-          height: 2.25rem;
-          min-width: 220px;
-          outline: none;
-        }
-        .dt-search input:focus{
-          border-color: rgba(37,99,235,.55);
-          box-shadow: 0 0 0 3px rgba(37,99,235,.18);
-        }
-        .dt-paging { display:flex; align-items:center; gap:.25rem; }
-        .dt-paging-button{
-          padding: .4rem .7rem;
-          border-radius: .75rem;
-          background: #fff;
-          color: #00295d;
-          border: 1px solid rgba(0,0,0,.10);
-          cursor: pointer;
-          user-select: none;
-        }
-        .dt-paging-button:hover{ background: rgba(0,0,0,.04); }
-        .dt-paging-button.disabled{ opacity:.45; cursor:not-allowed; }
-        .dt-paging-button.current{ background: #2563eb; color: #fff; border-color: transparent; }
-        .dt-info { font-size: .75rem; opacity: .65; }
-        .buttons-excel{
-          padding: .45rem .75rem;
-          border-radius: .75rem;
-          background: #22c55e;
-          color: #fff;
-          border: none;
-          cursor: pointer;
-        }
-        .buttons-excel:hover{ filter: brightness(0.95); }
-        table.dataTable thead th { font-weight: 700; }
-    </style>
-    <style>
-        /* Força a tabela a respeitar o limite da tela enquanto o JS não carrega */
-        .dt-container { width: 100% !important; overflow-x: auto; }
-        table { width: 100% !important; }
-        
-        /* Evita que os botões do DataTables fiquem colados no topo */
-        .dt-buttons { margin-bottom: 1rem; }
     </style>
       
 </head>

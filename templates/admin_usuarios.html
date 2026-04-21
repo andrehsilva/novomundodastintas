@@ -284,6 +284,31 @@
         </div>
         <form method="dialog" class="modal-backdrop bg-black/40"><button>close</button></form>
     </dialog>
+
+    {% for p in pintores %}
+        {% for t in p.transacoes %}
+        <dialog id="modal_edit_transacao_{{ t.id }}" class="modal">
+            <div class="modal-box max-w-sm rounded-3xl border-2 border-amber-200">
+                <h3 class="font-black text-lg mb-4 text-amber-600">Editar Lançamento</h3>
+                <form action="{{ url_for('admin_editar_transacao', id=t.id) }}" method="POST" class="space-y-4">
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-bold text-xs">Pontos</span></label>
+                        <input type="number" name="pontos" class="input input-bordered w-full font-bold" value="{{ t.pontos }}" required>
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-bold text-xs">Descrição/NF</span></label>
+                        <input type="text" name="descricao" class="input input-bordered w-full" value="{{ t.descricao }}" required>
+                    </div>
+                    <div class="modal-action">
+                        <button class="btn btn-warning w-full text-white font-black uppercase">Salvar Alteração</button>
+                    </div>
+                </form>
+                <form method="dialog" class="mt-2"><button class="btn btn-sm btn-ghost w-full">Cancelar</button></form>
+            </div>
+            <form method="dialog" class="modal-backdrop bg-black/40"><button>close</button></form>
+        </dialog>
+        {% endfor %}
+    {% endfor %}
   
     <dialog id="modal_del_{{ p.id }}" class="modal">
         <div class="modal-box max-w-sm rounded-3xl border-2 border-rose-200 p-8 text-center">

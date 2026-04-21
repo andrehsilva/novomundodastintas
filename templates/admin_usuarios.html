@@ -341,15 +341,16 @@
 
 <script>
 $(document).ready(function() {
-    // Inicialização de Máscaras
+    // Máscaras
     $('#reg_telefone').mask('(00) 00000-0000');
     $('.telefone-mask').mask('(00) 00000-0000');
 
-    // Configuração da Tabela Principal (DataTables)
-    $('#tabelaPintores').DataTable({
+    // Inicializa Tabela Principal
+    var tablePintores = $('#tabelaPintores').DataTable({
         language: { url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json' },
         pageLength: 10,
-        order: [[4, 'desc']], // Ordena por saldo padrão
+        order: [[4, 'desc']],
+        autoWidth: false,
         dom: '<"flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-4"Bf>rt<"flex flex-col md:flex-row md:justify-between md:items-center gap-3 mt-4"ip>',
         buttons: [{
             extend: 'excelHtml5',
@@ -360,11 +361,23 @@ $(document).ready(function() {
         }]
     });
 
-    // Configuração das Tabelas de Histórico nos Modais
-    $('.tabelaModal').DataTable({
+    // Inicializa Tabelas de Histórico nos Modais
+    var tablesModais = $('.tabelaModal').DataTable({
         language: { url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json' },
         pageLength: 5,
-        dom: 'frtip'
+        dom: 'frtip',
+        autoWidth: false
+    });
+
+    // CORREÇÃO DO LAYOUT QUEBRADO: 
+    // Quando qualquer modal abre, forçamos o DataTables a recalcular as larguras
+    document.querySelectorAll('dialog').forEach(modal => {
+        modal.addEventListener('show', () => {
+            setTimeout(() => {
+                tablesModais.columns.adjust().draw();
+                tablePintores.columns.adjust().draw();
+            }, 150); // Pequeno delay para o DaisyUI terminar a animação
+        });
     });
 });
 </script>

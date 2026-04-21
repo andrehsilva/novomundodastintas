@@ -2,7 +2,6 @@
 {% block title %}Gestão de Usuários - PinturaFiel{% endblock %}
 
 {% block content %}
-
 <div class="max-w-[98%] mx-auto space-y-6 pb-10">
     
     <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-base-100 p-6 rounded-2xl shadow-sm border border-base-300">
@@ -25,13 +24,13 @@
         <div class="card bg-white shadow-lg border-l-4 border-l-info rounded-xl">
             <div class="card-body p-4">
                 <h2 class="card-title text-sm text-info flex items-center gap-2 font-bold uppercase tracking-wider">
-                    <i class="fa-solid fa-clipboard-check"></i> Novos Pedidos para Aprovar ({{ pendentes|length }})
+                    <i class="fa-solid fa-clipboard-check"></i> Pedidos para Aprovar ({{ pendentes|length }})
                 </h2>
-                <div class="overflow-x-auto mt-2">
+                <div class="overflow-x-auto mt-2 max-h-60">
                     <table class="table table-xs w-full">
                         <tbody>
                             {% for r in pendentes %}
-                            <tr class="hover:bg-base-200/50 transition-colors">
+                            <tr class="hover:bg-base-200/50">
                                 <td class="font-bold text-[#00295d]">{{ r.user_obj.nome }}</td>
                                 <td class="italic text-xs opacity-70">{{ r.descricao }}</td>
                                 <td class="text-right space-x-1">
@@ -39,14 +38,14 @@
                                         <button class="btn btn-success btn-xs text-white px-3">Aprovar</button>
                                     </form>
                                     <form method="post" action="{{ url_for('admin_aprovar_resgate', id=r.id, acao='reprovar') }}" class="inline">
-                                        <button class="btn btn-ghost btn-xs text-error hover:bg-error/10">Recusar</button>
+                                        <button class="btn btn-ghost btn-xs text-error">Recusar</button>
                                     </form>
                                 </td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
-                    {% if not pendentes %}<p class="text-center py-4 opacity-40 text-xs italic">Nenhum pedido pendente de aprovação.</p>{% endif %}
+                    {% if not pendentes %}<p class="text-center py-4 opacity-40 text-xs italic">Nada pendente.</p>{% endif %}
                 </div>
             </div>
         </div>
@@ -55,9 +54,9 @@
         <div class="card bg-white shadow-lg border-l-4 border-l-success rounded-xl">
             <div class="card-body p-4">
                 <h2 class="card-title text-sm text-success flex items-center gap-2 font-bold uppercase tracking-wider">
-                    <i class="fa-solid fa-truck-ramp-box"></i> Aguardando Retirada na Loja ({{ para_entregar|length }})
+                    <i class="fa-solid fa-truck-ramp-box"></i> Aguardando Retirada ({{ para_entregar|length }})
                 </h2>
-                <div class="overflow-x-auto mt-2">
+                <div class="overflow-x-auto mt-2 max-h-60">
                     <table class="table table-xs w-full">
                         <tbody>
                             {% for r in para_entregar %}
@@ -73,7 +72,7 @@
                             {% endfor %}
                         </tbody>
                     </table>
-                    {% if not para_entregar %}<p class="text-center py-4 opacity-40 text-xs italic">Nenhum prêmio aguardando entrega.</p>{% endif %}
+                    {% if not para_entregar %}<p class="text-center py-4 opacity-40 text-xs italic">Nada para entregar.</p>{% endif %}
                 </div>
             </div>
         </div>
@@ -81,153 +80,88 @@
 
     <div class="card bg-white shadow-xl border border-base-300 rounded-2xl overflow-hidden">
         <div class="card-body p-6">
-            <table id="tabelaPintores" class="table table-zebra w-full !border-collapse">
-                <thead class="bg-base-200 text-[#00295d]">
-                    <tr class="text-sm uppercase tracking-wider">
-                        <th>Pintor</th>
-                        <th>Telefone (Login)</th>
-                        <th>Acumulado</th>
-                        <th>Resgatado</th>
-                        <th>Saldo Atual</th>
-                        <th class="text-center no-export">Ações</th>
-                    </tr>
-                </thead>
-                <tbody class="text-slate-700">
-                    {% for p in pintores %}
-                    {% set ganho = p.transacoes | rejectattr('status', 'equalto', 'reprovado') | selectattr('pontos', 'gt', 0) | map(attribute='pontos') | sum %}
-                    {% set gasto = p.transacoes | selectattr('status', 'in', ['concluido', 'entregue', 'pendente']) | selectattr('pontos', 'lt', 0) | map(attribute='pontos') | sum | abs %}
-                    <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="font-black text-[#00295d]">{{ p.nome }}</td>
-                        <td class="text-xs font-mono font-bold">{{ p.telefone }}</td>
-                        <td class="text-emerald-600 font-black">+ {{ ganho }}</td>
-                        <td class="text-rose-600 font-black">- {{ gasto }}</td>
-                        <td><div class="badge badge-neutral font-black px-4">{{ p.saldo_total }}</div></td>
-                        <td class="text-center">
-                            <div class="flex justify-center gap-1">
-                                <button onclick="document.getElementById('modal_log_{{ p.id }}').showModal()" 
-                                        class="btn btn-circle btn-sm bg-blue-50 border-none text-blue-600 hover:bg-blue-100 shadow-sm" title="Ver Histórico">
-                                    <i class="fa-solid fa-clock-rotate-left"></i>
-                                </button>
-                                
-                                <button onclick="document.getElementById('modal_edit_{{ p.id }}').showModal()" 
-                                        class="btn btn-circle btn-sm bg-amber-50 border-none text-amber-600 hover:bg-amber-100 shadow-sm" title="Editar Dados">
-                                    <i class="fa-solid fa-pen"></i>
-                                </button>
-                                
-                                <button onclick="document.getElementById('modal_reset_{{ p.id }}').showModal()" 
-                                        class="btn btn-circle btn-sm bg-orange-50 border-none text-orange-600 hover:bg-orange-100 shadow-sm" title="Resetar Senha">
-                                    <i class="fa-solid fa-key"></i>
-                                </button>
-                                
-                                <button onclick="document.getElementById('modal_del_{{ p.id }}').showModal()" 
-                                        class="btn btn-circle btn-sm bg-rose-50 border-none text-rose-600 hover:bg-rose-100 shadow-sm" title="Excluir Usuário">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+                <div class="relative w-full md:w-96">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 opacity-50">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" id="filtroPintores" 
+                           placeholder="Buscar por nome, telefone ou CPF..." 
+                           class="input input-bordered w-full pl-10 rounded-xl focus:border-[#00295d]">
+                </div>
+                
+                <button onclick="gerarExcelPintores()" class="btn btn-success text-white font-bold rounded-xl shadow-md border-none">
+                    <i class="fa-solid fa-file-excel mr-2"></i> Exportar Excel
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table id="tabelaDados" class="table table-zebra w-full">
+                    <thead class="bg-base-200 text-[#00295d]">
+                        <tr class="text-sm uppercase">
+                            <th>Pintor</th>
+                            <th>Telefone</th>
+                            <th>Acumulado</th>
+                            <th>Resgatado</th>
+                            <th>Saldo Atual</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaPintores">
+                        {% for p in pintores %}
+                        {% set ganho = p.transacoes | rejectattr('status', 'equalto', 'reprovado') | selectattr('pontos', 'gt', 0) | map(attribute='pontos') | sum %}
+                        {% set gasto = p.transacoes | selectattr('status', 'in', ['concluido', 'entregue', 'pendente']) | selectattr('pontos', 'lt', 0) | map(attribute='pontos') | sum | abs %}
+                        <tr class="hover:bg-slate-50 transition-colors item-pintor">
+                            <td class="font-black text-[#00295d]">{{ p.nome }}</td>
+                            <td class="text-xs font-mono font-bold">{{ p.telefone }}</td>
+                            <td class="text-emerald-600 font-black">+ {{ ganho }}</td>
+                            <td class="text-rose-600 font-black">- {{ gasto }}</td>
+                            <td><div class="badge badge-neutral font-black px-4">{{ p.saldo_total }}</div></td>
+                            <td class="text-center">
+                                <div class="flex justify-center gap-1">
+                                    <button onclick="document.getElementById('modal_log_{{ p.id }}').showModal()" class="btn btn-circle btn-sm bg-blue-50 border-none text-blue-600 hover:bg-blue-100 shadow-sm"><i class="fa-solid fa-clock-rotate-left"></i></button>
+                                    <button onclick="document.getElementById('modal_edit_{{ p.id }}').showModal()" class="btn btn-circle btn-sm bg-amber-50 border-none text-amber-600 hover:bg-amber-100 shadow-sm"><i class="fa-solid fa-pen"></i></button>
+                                    <button onclick="document.getElementById('modal_reset_{{ p.id }}').showModal()" class="btn btn-circle btn-sm bg-orange-50 border-none text-orange-600 hover:bg-orange-100 shadow-sm"><i class="fa-solid fa-key"></i></button>
+                                    <button onclick="document.getElementById('modal_del_{{ p.id }}').showModal()" class="btn btn-circle btn-sm bg-rose-50 border-none text-rose-600 hover:bg-rose-100 shadow-sm"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <dialog id="modal_novo_usuario" class="modal">
-        <div class="modal-box max-w-md border-2 border-primary/20 rounded-3xl">
-            <h3 class="font-bold text-xl mb-6 text-primary flex items-center gap-2">
-                <i class="fa-solid fa-user-plus"></i> Novo Profissional Parceiro
-            </h3>
-            <form method="post" action="{{ url_for('admin_novo_usuario') }}" class="space-y-4">
-                <input type="text" name="nome" placeholder="Nome Completo do Pintor" class="input input-bordered w-full" required>
-                
-                <div class="form-control">
-                    <input type="text" name="telefone" id="reg_telefone" placeholder="Telefone (Será o Login)" class="input input-bordered w-full" required>
-                    <label class="label"><span class="label-text-alt opacity-60">O pintor usará este número para acessar o painel.</span></label>
-                </div>
-
-                <input type="email" name="email" placeholder="Endereço de E-mail (Opcional)" class="input input-bordered w-full">
-                <input type="text" name="cpf_cnpj" placeholder="Documento CPF ou CNPJ" class="input input-bordered w-full" required>
-                <input type="password" name="senha" placeholder="Defina a Senha Inicial" class="input input-bordered w-full" required>
-                
-                <div class="modal-action mt-6">
-                    <button type="submit" class="btn btn-primary w-full text-white font-black uppercase tracking-widest">Criar e Ativar Conta</button>
-                </div>
-            </form>
-            <form method="dialog" class="mt-4"><button class="btn btn-ghost btn-block btn-sm">Cancelar Operação</button></form>
-        </div>
-        <form method="dialog" class="modal-backdrop bg-black/40"><button>close</button></form>
-    </dialog>
-
-    <dialog id="modal_credito" class="modal">
-        <div class="modal-box max-w-md border-2 border-primary/20 rounded-3xl">
-            <h3 class="font-bold text-xl mb-6 text-primary flex items-center gap-2">
-                <i class="fa-solid fa-coins"></i> Lançamento de Pontos Manual
-            </h3>
-            <form method="post" action="{{ url_for('admin_usuarios') }}" class="space-y-4">
-                <input type="hidden" name="acao" value="credito_manual">
-                <div class="form-control">
-                    <label class="label"><span class="label-text font-bold text-slate-500 uppercase text-xs">Pintor Beneficiado</span></label>
-                    <select name="user_id" class="select select-bordered w-full font-bold text-[#00295d]" required>
-                        <option value="" disabled selected>Escolha o profissional...</option>
-                        {% for p in pintores %}<option value="{{ p.id }}">{{ p.nome }} ({{ p.telefone }})</option>{% endfor %}
-                    </select>
-                </div>
-                <div class="form-control">
-                    <label class="label"><span class="label-text font-bold text-slate-500 uppercase text-xs">Quantidade de Pontos</span></label>
-                    <input type="number" name="pontos" class="input input-bordered w-full font-black text-emerald-600" placeholder="0" required min="1">
-                </div>
-                <div class="form-control">
-                    <label class="label"><span class="label-text font-bold text-slate-500 uppercase text-xs">Justificativa / Nota Fiscal</span></label>
-                    <input type="text" name="descricao" class="input input-bordered w-full" placeholder="Ex: NF-4521 ou Bonificação" required>
-                </div>
-                <div class="modal-action mt-6">
-                    <button class="btn btn-primary w-full text-white font-black uppercase tracking-widest">Confirmar Lançamento</button>
-                </div>
-            </form>
-            <form method="dialog" class="mt-4"><button class="btn btn-ghost btn-block btn-sm">Cancelar</button></form>
-        </div>
-        <form method="dialog" class="modal-backdrop bg-black/40"><button>close</button></form>
-    </dialog>
-
     {% for p in pintores %}
-    <dialog id="modal_reset_{{ p.id }}" class="modal">
-        <div class="modal-box max-w-sm rounded-3xl border-2 border-warning/20">
-            <h3 class="font-bold text-lg mb-4 text-[#00295d]">Nova Senha para {{ p.nome }}</h3>
-            <form action="{{ url_for('admin_resetar_senha', id=p.id) }}" method="POST" class="space-y-4">
-                <input type="text" name="nova_senha" placeholder="Digite a nova senha aqui" class="input input-bordered w-full font-bold" required>
-                <button class="btn btn-warning w-full text-white font-bold uppercase">Confirmar Nova Senha</button>
-            </form>
-            <form method="dialog" class="mt-4"><button class="btn btn-sm btn-ghost w-full">Cancelar</button></form>
-        </div>
-        <form method="dialog" class="modal-backdrop bg-black/40"><button>close</button></form>
-    </dialog>
-
     <dialog id="modal_log_{{ p.id }}" class="modal">
-        <div class="modal-box w-11/12 max-w-4xl p-0 overflow-hidden rounded-3xl border border-base-300 shadow-2xl">
+        <div class="modal-box w-11/12 max-w-4xl p-0 overflow-hidden rounded-3xl border border-base-300">
             <div class="bg-[#00295d] p-6 flex justify-between items-center text-white">
                 <div>
                     <h3 class="font-black text-xl">Extrato Detalhado</h3>
-                    <p class="text-xs opacity-70 font-medium">Profissional: {{ p.nome }}</p>
+                    <p class="text-xs opacity-70">Profissional: {{ p.nome }}</p>
                 </div>
                 <form method="dialog"><button class="btn btn-sm btn-circle btn-ghost text-white">✕</button></form>
             </div>
-            <div class="p-8">
-                <table class="table table-sm w-full tabelaModal border-collapse">
+            <div class="p-8 overflow-x-auto">
+                <table class="table table-sm w-full">
                     <thead>
-                        <tr class="text-[#00295d] uppercase tracking-widest text-[10px]">
-                            <th class="py-4">Data e Hora</th>
+                        <tr class="text-[#00295d] uppercase text-[10px]">
+                            <th>Data</th>
                             <th>Descrição</th>
                             <th class="text-center">Status</th>
                             <th class="text-right">Pontos</th>
-                            <th class="text-center">Ações</th> </tr>
+                            <th class="text-center">Ações</th>
+                        </tr>
                     </thead>
-                    <tbody class="text-slate-600">
+                    <tbody>
                         {% for t in p.transacoes | sort(attribute='data', reverse=True) %}
-                        <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="font-medium">{{ t.data.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <tr>
+                            <td>{{ t.data.strftime('%d/%m/%Y %H:%M') }}</td>
                             <td class="font-bold">{{ t.descricao }}</td>
                             <td class="text-center">
-                                <span class="badge badge-xs p-2 font-black tracking-tighter uppercase
+                                <span class="badge badge-xs p-2 font-black uppercase text-[9px]
                                     {{ 'bg-emerald-100 text-emerald-700' if t.status == 'entregue' }}
                                     {{ 'bg-blue-100 text-blue-700' if t.status == 'concluido' }}
                                     {{ 'bg-amber-100 text-amber-700' if t.status == 'pendente' }}
@@ -235,14 +169,12 @@
                                     {{ t.status }}
                                 </span>
                             </td>
-                            <td class="text-right font-black text-base {{ 'text-emerald-500' if t.pontos > 0 else 'text-rose-500' }}">
+                            <td class="text-right font-black {{ 'text-emerald-500' if t.pontos > 0 else 'text-rose-500' }}">
                                 {{ '+' if t.pontos > 0 }}{{ t.pontos }}
                             </td>
-                            <td class="text-center"> {% if t.pontos > 0 %}
-                                <button onclick="document.getElementById('modal_edit_transacao_{{ t.id }}').showModal()" 
-                                        class="btn btn-ghost btn-xs text-amber-600 hover:bg-amber-50" title="Editar este lançamento">
-                                    <i class="fa-solid fa-pen-to-square"></i>
-                                </button>
+                            <td class="text-center">
+                                {% if t.pontos > 0 %}
+                                <button onclick="document.getElementById('modal_edit_transacao_{{ t.id }}').showModal()" class="btn btn-ghost btn-xs text-amber-600"><i class="fa-solid fa-pen-to-square"></i></button>
                                 {% endif %}
                             </td>
                         </tr>
@@ -251,134 +183,105 @@
                 </table>
             </div>
         </div>
-        <form method="dialog" class="modal-backdrop bg-slate-900/60 backdrop-blur-sm"><button>close</button></form>
+        <form method="dialog" class="modal-backdrop bg-black/40"><button>close</button></form>
     </dialog>
 
     <dialog id="modal_edit_{{ p.id }}" class="modal">
-        <div class="modal-box max-w-md rounded-3xl border-2 border-amber-200">
-          <h3 class="font-black text-xl mb-6 text-amber-600 uppercase tracking-tighter">Editar Cadastro: {{ p.nome }}</h3>
+        <div class="modal-box max-w-md rounded-3xl">
+          <h3 class="font-black text-xl mb-6 text-amber-600">Editar Cadastro: {{ p.nome }}</h3>
           <form action="{{ url_for('admin_editar_usuario', id=p.id) }}" method="POST" class="space-y-4">
-            <div class="form-control">
-                <label class="label"><span class="label-text font-bold text-slate-500 text-xs">Nome Completo</span></label>
-                <input type="text" name="nome" class="input input-bordered w-full font-bold" value="{{ p.nome }}" required>
-            </div>
-            <div class="form-control">
-                <label class="label"><span class="label-text font-bold text-slate-500 text-xs">Telefone de Acesso</span></label>
-                <input type="text" name="telefone" class="input input-bordered w-full font-mono telefone-mask" value="{{ p.telefone }}" required>
-            </div>
-            <div class="form-control">
-                <label class="label"><span class="label-text font-bold text-slate-500 text-xs">E-mail</span></label>
-                <input type="email" name="email" class="input input-bordered w-full" value="{{ p.email or '' }}" placeholder="Não cadastrado">
-            </div>
-            <div class="form-control">
-                <label class="label"><span class="label-text font-bold text-slate-500 text-xs">CPF ou CNPJ</span></label>
-                <input type="text" name="cpf_cnpj" class="input input-bordered w-full font-mono" value="{{ p.cpf_cnpj or '' }}">
-            </div>
-            <div class="form-control">
-                <label class="label"><span class="label-text font-bold text-amber-600 text-xs uppercase">Alterar Senha?</span></label>
-                <input type="text" name="senha" class="input input-bordered w-full border-amber-100" placeholder="Deixe em branco para não alterar">
-            </div>
-            <div class="modal-action mt-6">
-                <button class="btn btn-warning w-full text-white font-black uppercase tracking-widest shadow-lg">Salvar Alterações</button>
-            </div>
+            <input type="text" name="nome" class="input input-bordered w-full font-bold" value="{{ p.nome }}" required>
+            <input type="text" name="telefone" class="input input-bordered w-full font-mono telefone-mask" value="{{ p.telefone }}" required>
+            <input type="email" name="email" class="input input-bordered w-full" value="{{ p.email or '' }}" placeholder="E-mail">
+            <input type="text" name="cpf_cnpj" class="input input-bordered w-full font-mono" value="{{ p.cpf_cnpj or '' }}" placeholder="CPF/CNPJ">
+            <input type="text" name="senha" class="input input-bordered w-full" placeholder="Nova senha (opcional)">
+            <button class="btn btn-warning w-full text-white font-black uppercase shadow-lg">Salvar Alterações</button>
           </form>
-          <form method="dialog" class="mt-4"><button class="btn btn-sm btn-ghost w-full">Cancelar e Sair</button></form>
+          <form method="dialog" class="mt-4"><button class="btn btn-sm btn-ghost w-full">Cancelar</button></form>
         </div>
         <form method="dialog" class="modal-backdrop bg-black/40"><button>close</button></form>
     </dialog>
 
-    {% for p in pintores %}
-        {% for t in p.transacoes %}
-        <dialog id="modal_edit_transacao_{{ t.id }}" class="modal">
-            <div class="modal-box max-w-sm rounded-3xl border-2 border-amber-200">
-                <h3 class="font-black text-lg mb-4 text-amber-600">Editar Lançamento</h3>
-                <form action="{{ url_for('admin_editar_transacao', id=t.id) }}" method="POST" class="space-y-4">
-                    <div class="form-control">
-                        <label class="label"><span class="label-text font-bold text-xs">Pontos</span></label>
-                        <input type="number" name="pontos" class="input input-bordered w-full font-bold" value="{{ t.pontos }}" required>
-                    </div>
-                    <div class="form-control">
-                        <label class="label"><span class="label-text font-bold text-xs">Descrição/NF</span></label>
-                        <input type="text" name="descricao" class="input input-bordered w-full" value="{{ t.descricao }}" required>
-                    </div>
-                    <div class="modal-action">
-                        <button class="btn btn-warning w-full text-white font-black uppercase">Salvar Alteração</button>
-                    </div>
-                </form>
-                <form method="dialog" class="mt-2"><button class="btn btn-sm btn-ghost w-full">Cancelar</button></form>
-            </div>
-            <form method="dialog" class="modal-backdrop bg-black/40"><button>close</button></form>
-        </dialog>
-        {% endfor %}
-    {% endfor %}
-  
-    <dialog id="modal_del_{{ p.id }}" class="modal">
-        <div class="modal-box max-w-sm rounded-3xl border-2 border-rose-200 p-8 text-center">
-            <div class="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                <i class="fa-solid fa-triangle-exclamation text-3xl text-rose-500"></i>
-            </div>
-            <h3 class="font-black text-xl mb-2 text-rose-600 uppercase">Confirmar Exclusão</h3>
-            <p class="text-sm text-slate-500 mb-8 font-medium">
-                Deseja remover permanentemente o pintor <b>{{ p.nome }}</b>? <br>
-                O histórico de pontos será perdido.
-            </p>
-            <div class="flex flex-col gap-2">
-                <form action="{{ url_for('admin_deletar_usuario', id=p.id) }}" method="POST">
-                    <button class="btn btn-error w-full text-white font-black uppercase shadow-lg shadow-rose-200">Sim, Remover Conta</button>
-                </form>
-                <form method="dialog">
-                    <button class="btn btn-ghost btn-block font-bold">Não, Manter Cadastro</button>
-                </form>
-            </div>
+    {% for t in p.transacoes %}
+    <dialog id="modal_edit_transacao_{{ t.id }}" class="modal">
+        <div class="modal-box max-w-sm rounded-3xl border-2 border-amber-100">
+            <h3 class="font-black text-lg mb-4 text-amber-600">Editar Pontos</h3>
+            <form action="{{ url_for('admin_editar_transacao', id=t.id) }}" method="POST" class="space-y-4">
+                <input type="number" name="pontos" class="input input-bordered w-full font-bold" value="{{ t.pontos }}" required>
+                <input type="text" name="descricao" class="input input-bordered w-full" value="{{ t.descricao }}" required>
+                <button class="btn btn-warning w-full text-white font-black">Salvar Alteração</button>
+            </form>
+            <form method="dialog" class="mt-2"><button class="btn btn-sm btn-ghost w-full">Sair</button></form>
         </div>
-        <form method="dialog" class="modal-backdrop bg-slate-900/60 backdrop-blur-sm"><button>close</button></form>
+        <form method="dialog" class="modal-backdrop bg-black/40"><button>close</button></form>
     </dialog>
     {% endfor %}
 
+    <dialog id="modal_del_{{ p.id }}" class="modal">
+        <div class="modal-box max-w-sm rounded-3xl border-2 border-rose-200 p-8 text-center">
+            <h3 class="font-black text-xl mb-4 text-rose-600">Remover Pintor?</h3>
+            <p class="text-sm mb-8">O histórico de <b>{{ p.nome }}</b> será perdido.</p>
+            <form action="{{ url_for('admin_deletar_usuario', id=p.id) }}" method="POST">
+                <button class="btn btn-error w-full text-white font-black">Sim, Remover</button>
+            </form>
+            <form method="dialog" class="mt-2"><button class="btn btn-ghost btn-block">Cancelar</button></form>
+        </div>
+    </dialog>
+    {% endfor %}
+
+    <dialog id="modal_novo_usuario" class="modal">
+        <div class="modal-box max-w-md rounded-3xl">
+            <h3 class="font-bold text-xl mb-6 text-primary">Novo Profissional</h3>
+            <form method="post" action="{{ url_for('admin_novo_usuario') }}" class="space-y-4">
+                <input type="text" name="nome" placeholder="Nome Completo" class="input input-bordered w-full" required>
+                <input type="text" name="telefone" id="reg_telefone" placeholder="Telefone" class="input input-bordered w-full" required>
+                <input type="text" name="cpf_cnpj" placeholder="CPF ou CNPJ" class="input input-bordered w-full" required>
+                <input type="password" name="senha" placeholder="Senha Inicial" class="input input-bordered w-full" required>
+                <button type="submit" class="btn btn-primary w-full text-white font-black">Criar Conta</button>
+            </form>
+            <form method="dialog" class="mt-4"><button class="btn btn-ghost btn-block btn-sm">Sair</button></form>
+        </div>
+    </dialog>
+
+    <dialog id="modal_credito" class="modal">
+        <div class="modal-box max-w-md rounded-3xl">
+            <h3 class="font-bold text-xl mb-6 text-primary">Lançamento de Pontos</h3>
+            <form method="post" action="{{ url_for('admin_usuarios') }}" class="space-y-4">
+                <input type="hidden" name="acao" value="credito_manual">
+                <select name="user_id" class="select select-bordered w-full" required>
+                    <option value="" disabled selected>Escolha o profissional...</option>
+                    {% for p in pintores %}<option value="{{ p.id }}">{{ p.nome }}</option>{% endfor %}
+                </select>
+                <input type="number" name="pontos" class="input input-bordered w-full" placeholder="Quantidade" required>
+                <input type="text" name="descricao" class="input input-bordered w-full" placeholder="NF ou Motivo" required>
+                <button class="btn btn-primary w-full text-white font-black">Confirmar Lançamento</button>
+            </form>
+        </div>
+    </dialog>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <script>
 $(document).ready(function() {
     // Máscaras
-    $('#reg_telefone').mask('(00) 00000-0000');
-    $('.telefone-mask').mask('(00) 00000-0000');
+    $('#reg_telefone, .telefone-mask').mask('(00) 00000-0000');
 
-    // Inicializa Tabela Principal
-    var tablePintores = $('#tabelaPintores').DataTable({
-        language: { url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json' },
-        pageLength: 10,
-        order: [[4, 'desc']],
-        autoWidth: false,
-        dom: '<"flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-4"Bf>rt<"flex flex-col md:flex-row md:justify-between md:items-center gap-3 mt-4"ip>',
-        buttons: [{
-            extend: 'excelHtml5',
-            text: '<i class="fa-solid fa-file-excel mr-2"></i> Gerar Relatório Excel',
-            className: 'btn btn-success btn-sm text-white font-bold px-4 rounded-xl',
-            title: 'Relatorio_Participantes_PinturaFiel',
-            exportOptions: { columns: ':not(.no-export)' }
-        }]
-    });
-
-    // Inicializa Tabelas de Histórico nos Modais
-    var tablesModais = $('.tabelaModal').DataTable({
-        language: { url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json' },
-        pageLength: 5,
-        dom: 'frtip',
-        autoWidth: false
-    });
-
-    // CORREÇÃO DO LAYOUT QUEBRADO: 
-    // Quando qualquer modal abre, forçamos o DataTables a recalcular as larguras
-    document.querySelectorAll('dialog').forEach(modal => {
-        modal.addEventListener('show', () => {
-            setTimeout(() => {
-                tablesModais.columns.adjust().draw();
-                tablePintores.columns.adjust().draw();
-            }, 150); // Pequeno delay para o DaisyUI terminar a animação
+    // FILTRO DE BUSCA INSTANTÂNEO (SEM LENTIDÃO)
+    $("#filtroPintores").on("keyup", function() {
+        var value = $(this).val().toLowerCase();
+        $("#listaPintores tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
         });
     });
 });
+
+// GERA EXCEL SEM PRECISAR DO DATATABLES
+function gerarExcelPintores() {
+    const table = document.getElementById("tabelaDados");
+    const wb = XLSX.utils.table_to_book(table, {sheet: "Pintores"});
+    XLSX.writeFile(wb, "Relatorio_PinturaFiel.xlsx");
+}
 </script>
 {% endblock %}
